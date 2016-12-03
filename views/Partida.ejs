@@ -1,0 +1,58 @@
+<%- include header %>
+
+	<div class="Contenedor">
+		<div class="TextoFondo"></div>
+
+		<div class="Contenido">
+			<h1>&#124Partida: <%= partida.Nombre %></h1>
+			<div class="FormPanel">
+				<p>
+					Creado por: <span class="negrita"><%= partida.Creador %></span> <br>
+                                        Jugadores: <span class="negrita"><%= partida.Participantes.substring(1,partida.Participantes.length) %></span> <br>
+                                        Turno de: <span class="negrita"><%= partida.Turno %></span> <br>
+                                        Turnos restantes: <span class="negrita"><%= partida.Max_turno %></span>
+				</p>
+			</div>
+                        <h1>&#124Tablero</h1>
+                        <div class="tablaPartida">
+                            <table cellspacing="5">
+                                <% console.log("hola"); %>
+                                <% for(var fila=0; fila < 7; fila++) { %>
+                                    <tr>
+                                    <% for(var columna=0; columna < 7; columna++) { %>
+                                        <% if(fila === 3 && columna ===0) { %>
+                                            <td><img src="../images/Start.png"></td>
+                                        <% } else if(columna === 6) { %>
+                                            <% if(fila === 1 || fila === 3 || fila === 5) { %>
+                                                <td><img src="../images/DNK.png"></td>
+                                            <% } else { %>
+                                                <td>&nbsp;</td>
+                                            <% } %>
+                                        <% } else { %>
+                                            <td>&nbsp;</td>
+                                        <% } %>
+                                    <% } %>
+                                    </tr>
+                                <% } %>
+                            </table>
+                        </div>
+                        <h1>&#124Tus cartas</h1>
+                        <div class="tablaPartida">
+                            <table>
+                                <% var nCarta = 0 %>
+                                <% if(numJugadores <= 5) { %>
+                                    <% nCarta = 6 %>
+                                <% } else { %>
+                                    <% nCarta = 5 %>
+                                <% } %>
+                                <tr>
+                                <% for(var i=0; i < nCarta; i++){ %>
+                                    <td><a class="UnirCerrar" href="/carta<%= i %>">&nbsp;</a></td>
+                                <% } %>
+                                </tr>
+                            </table>
+                        </div>
+		</div>
+		</div>
+	</div>
+<%- include footer %>

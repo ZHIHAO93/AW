@@ -1,0 +1,58 @@
+/* Estilo de welcome */
+
+.Contenedor {
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    position: relative;
+}
+
+.Contenido {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+h1 {
+    margin-left: 10px;
+}
+
+.TablaGrande td {
+    vertical-align: top;
+    padding-left: 20px;
+}
+
+.Tablas {
+    border-collapse: collapse;
+    text-align: center;
+    margin-right: 15px;
+    margin-bottom: 15px;
+}
+
+.Tablas th {
+    padding: 5px;
+    border: 1px solid black;
+    background-color: #cc6600;
+}
+
+.Tablas td {
+    vertical-align: middle;
+    border: 1px solid black;
+    background-color: #ffd9b3;
+    padding: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.Tablas input {
+    height: 100%;
+    width: 100%;
+    border: 0px;
+}
+.numJugadores {
+    width: 100px;
+}
+
+.resaltaFila td {
+    background-color: #ff8c1a;
+}

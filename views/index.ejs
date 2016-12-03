@@ -1,0 +1,55 @@
+<%- include header %>
+
+<div class="BienVenido">
+		<h1>&#124Bienvenido!</h1>
+		<p>
+			Puedes identificar o crear una cuenta de usuario.
+		</p>
+	</div>
+
+	<div class="NuevoUsuario">
+		<div class="TextoFondo"></div>
+		<div class="FormPanel">
+			<h1>&#124Nuevo usuario</h1>
+			<p>
+				Introduce tus datos de usuario. Los campos marcados con asterisco(<span class="ResaltaRojo">*</span>)son obligatorios;
+			</p>
+			<form action="jugador/reg" method="post" enctype="multipart/form-data">
+				<table>
+					<tr>
+						<td><label for="Nick">Nombre de usuario:<span class="ResaltaRojo">*</span></label></td>
+						<td><input class="TextField" type="text" name="Nick" id="Nick"></td>
+					</tr>
+					<tr>
+						<td><label for="Password">Contraseña：<span class="ResaltaRojo">*</span></label></td>
+						<td><input class="TextField" type="password" name="Password" id="Password"></td>
+					</tr>
+					<tr>
+						<td><label for="Nombre_completo">Nombre completo: <span class="ResaltaRojo">*</span></label></td>
+						<td><input class="TextField" type="text" name="Nombre_completo" id="Nombre_completo"></td>
+					</tr>
+					<tr>
+						<td>Sexo:<span class="ResaltaRojo">*</span></td>
+						<td><input type="radio" name="Sexo" value="H" id="Hombre"></input>
+                                                    <label for="Hombre">Hombre</label>
+                                                    <input type="radio" name="Sexo" value="M"></input>
+                                                    <label for="Mujer">Mujer</label>
+                                                </td>
+					</tr>
+					<tr>
+						<td><label for="Foto">Foto: </label></td>
+						<td><input type="file" name="Foto" id="Foto"></td>
+					</tr>
+					<tr>
+						<td><label for="Fecha_nacimiento">Fecha de nacimiento: </label></td>
+						<td><input class="TextField" type="text" name="Fecha_nacimiento" id ="Fecha_nacimiento"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input class="Boton" type="submit" value="Crear cuenta usuario"></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
+<%- include footer %>

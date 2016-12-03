@@ -1,0 +1,34 @@
+<%- include header %>
+
+	<div class="Contenedor">
+		<div class="TextoFondo"></div>
+
+		<div class="Contenido">
+			<h1>&#124Nueva partida</h1>
+			<div class="FormPanel">
+				<p>
+					Introduce los datos de la partida:
+				</p>
+				<form action="/crearPartida" method="post">
+					<table>
+						<tr>
+							<td><label for="nombre partida">Nombre:<span class="ResaltaRojo">*</span></label></td>
+							<td><input class="TextField" type="text" name="Nombre"></td>
+						</tr>
+						<tr>
+							<td><label for="numero jugador">Número máximo de jugadores (entre 3 y 7):
+							<span class="ResaltaRojo">*</span></label></td>
+							<td><input class="TextField" type="text" name="Max_jugadores"></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td><input class="Boton" type="submit" value="Crear partida"></td>
+						</tr>
+					</table>
+				</form>
+				<a class="ResaltaEnlace" href="/">Volver a la página de usuario</a>
+			</div>
+		</div>
+		</div>
+	</div>
+<%- include footer %>

@@ -1,0 +1,45 @@
+<%- include header %>
+
+	<div class="Contenedor">
+		<div class="TextoFondo"></div>
+
+		<div class="Contenido">
+			<h1>&#124Unirse a partida</h1>
+			<div class="FormPanel">
+				<p>
+					A continuación se muestra una lista con las partidas abiertas que admiten jugadores.
+				</p>
+				<table class="Tablas">
+					<tr>
+						<th>Nombre</th><th>Fecha</th><th>Máximo de jugadores</th><th>Jugadores apuntados</th>
+					</tr>
+					<% partida.forEach(function(parti) { %>
+						<% if (parti.Estado === "Abierta") {%>
+							<tr>
+								<td><%= parti.Nombre %></td>
+								<td><%= parti.Fecha %></td>
+								<td><%= parti.Max_jugadores %></td>
+								<td>
+									<%= parti.Participantes.substring(1, parti.Participantes.length) %>
+								</td>
+								<% if (parti.Num_jugadores !== parti.Max_jugadores) {%>
+                                                                    <% var listaJugadores = parti.Participantes.split(","); %>
+                                                                    <% var existe = false %>
+                                                                    <% listaJugadores.forEach(function(item) { %>
+                                                                        <% if (item === jugador.Nick) {%>
+                                                                            <% existe = true; }%>
+                                                                    <% }) %>
+                                                                        <% if(!existe) { %>
+									<td><a class="UnirCerrar" href="/unir/<%= parti.Nombre %>">Unirse</a></td>
+                                                                        <% } %>
+								<% } %>
+							</tr>
+						<% } %>
+					<% }) %>
+				</table>
+				<a class="ResaltaEnlace" href="/">Volver a la página de usuario</a>
+			</div>
+		</div>
+		</div>
+	</div>
+<%- include footer %>
