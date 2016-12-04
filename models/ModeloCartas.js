@@ -12,6 +12,53 @@ function Carta(carta){
     this.Estado = carta.Estado;
 }
 
+Carta.prototype.ponerCarta = function(callback) {
+    var conexion = mysql.createConnection();
+    var carta = this;
+    carta.Estado = "Tabla";
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "update carta set ? where Propietario = ? and Partida = ? and Path = ? and Estado = 'Mano'",
+                    [carta, carta.Propietario, carta.Partida, carta.Path],
+                    function(err, result) {
+                        if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            conexion.end();
+                            callback(null, result);
+                        }
+                    }
+            );
+        }
+    });
+};
+
+Carta.prototype.readTabla = function(callback) {
+    var conexion = mysql.createConnection();
+    var partida = this.Partida;
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "Select * from Carta where Partida = ? and Estado = 'Tabla' order by Fila, Columna",
+                    partida,
+                    function(err, rowCartas) {
+                        if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            conexion.end();
+                            callback(null, rowCartas);
+                        }
+                    }
+            );
+        }
+    });
+};
+
 Carta.prototype.readCartasMano = function(callback) {
     var conexion = mysql.createConnection();
     var PropPartida = [this.Propietario, this.Partida];
@@ -20,7 +67,7 @@ Carta.prototype.readCartasMano = function(callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                "Select * from Carta where Propietario = ? and Partida = ?",
+                "Select Path from Carta where Propietario = ? and Partida = ? and Estado = 'Mano'",
                 PropPartida,
                 function(err, result) {
                     if(err){
@@ -41,13 +88,21 @@ Carta.prototype.repartirCarta = function(numCard, callback) {
             callback(err, "undefined");
         } else {
             var newCartas = [];
-            var query = "";
-            for(var i=0;i<1;i++) {
-                var n = Math.floor(Math.random() * 15) + 1;
-                newCartas.push(n);
-                query += "Insert into carta set 'Propietario'=" + nuevaCarta.Propietario + ", 'Partida'=" + nuevaCarta.Partida + ", 'Path'=" + n + ";";
+            var valor = [];
+            var n;
+            var query = "Insert into carta (Propietario, Partida, Path, Estado) values ";
+            for(var i=0;i<numCard;i++) {
+                var obj = {};
+                n = Math.floor(Math.random() * 15) + 1;
+                while(valor.indexOf(n) > -1){
+                    n = Math.floor(Math.random() * 15) + 1;
+                }
+                valor.push(n);
+                obj.Path = n;
+                newCartas.push(obj);
+                query += "('" + nuevaCarta.Propietario + "', '" + nuevaCarta.Partida + "', '" + n + "','Mano'),";
             }
-            console.log(query);
+            query = query.substring(0, query.length-1);
             conexion.query(
                 query,
                 function(err, result) {

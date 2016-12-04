@@ -156,62 +156,62 @@ router.get('/partida/:nombre', function(req, res) {
                 nCarta = 5;
             }
             var carta = new ModeloCarta({Propietario: req.session.jugador.Nick, Partida: req.params.nombre});
-            carta.readCartasMano(function(err, rowCartas) {
+            carta.readTabla(function(err, cartaTabla) {
                 if(err) {
-                    console.error("Error en consulta cartas en la mano: " + err.message);
+                    console.error("Error en leer las cartas de la tabla: " + err.message);
                 } else {
-                    if(rowCartas.length === 0){
-                        carta.repartirCarta(nCarta, function(err, newCartas) {
-                            if(err){
-                                console.error("Error en repartir cartas: " + err.message);
+                    carta.readCartasMano(function(err, rowCartas) {
+                        if(err) {
+                            console.error("Error en consulta cartas en la mano: " + err.message);
+                        } else {
+                            if(rowCartas.length === 0){
+                                carta.repartirCarta(nCarta, function(err, newCartas) {
+                                    if(err){
+                                        console.error("Error en repartir cartas: " + err.message);
+                                    } else {
+                                        res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: newCartas, cartasTabla: cartaTabla });
+                                    }
+                                });
                             } else {
-                                res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: newCartas });
+                                console.log(cartaTabla);
+                                res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla } );
                             }
-                        });
-                    } else {
-                        res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: rowCartas[0] } );
-                    }
+                        }
+                    });
                 }
             });
         }
     });
-//    partida.Nombre = req.params.nombre;
-//    partida.read(function(err, rowPartida) {
-//        if(err) {
-//            console.error("Error en abrir partida:" + req.params.nombre);
-//            console.error("Con error: " + err.message);
-//            res.redirect('/jugador/' + req.session.jugador.Nick);
-//        } else {
-//            if(rowPartida.length > 0) {
-//                var participacion = new ModeloParticipacion("undefined");
-//                participacion.Partida = partida.Nombre;
-//                participacion.participantes(function(err, jugadores) {
-//                    if(err){
-//                        console.error("Error en leer los participantes");
-//                        console.error("Con error: " + err.message);
-//                        res.redirect('/jugador/' + req.session.jugador.Nick);
-//                    } else {
-//                        rowPartida[0].Participantes = "";
-//                        jugadores.forEach(function(jugador, index, array){
-//                            rowPartida[0].Participantes += "," + jugador.Jugador;
-//                            if(index === array.length - 1){
-//                                var cartas = new ModeloCarta({Propietario: req.session.jugador.Nick, Partida: req.params.nombre });
-//                                cartas.readCartasMano(function(err, result){
-//                                    if(err){
-//                                        console.log("Error en consultar cartas en la mano: " + err.message);
-//                                    } else {
-//                                        res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], numJugadores: jugadores.length, cartas: result } );
-//                                    }
-//                                });
-//                            }
-//                        });
-//                    }
-//                });
-//            } else {
-//                res.redirect('/jugador/' + req.session.jugador.Nick);
-//            }
-//        }
-//    });
+});
+
+router.get('/partida/:nombre/:carta', function(req, res) {
+    console.log("seleccionar la carta " + req.params.carta);
+    res.cookie("cartaSeleccionada", req.params.carta);
+    res.redirect('/partida/' + req.params.nombre);
+});
+
+router.get('/partida/:nombre/casilla/:filaColumna', function(req, res) {
+    var filaYcolumna = req.params.filaColumna;
+    var casilla = filaYcolumna.split('y');
+    if(req.cookies.cartaSeleccionada){
+        var carta = new ModeloCarta({ Fila: casilla[0], Columna: casilla[1], Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: req.cookies.cartaSeleccionada });
+        carta.ponerCarta(function(err, result) {
+            if(err) {
+                console.error("Error en poner carta al casila: " + err.message);
+            } else {
+                res.clearCookie("cartaSeleccionada");
+                carta.repartirCarta(1, function(err, result) {
+                    if(err) {
+                        console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
+                    } else {
+                        res.redirect('/partida/' + req.params.nombre);
+                    }
+                });
+            }
+        });
+    } else {
+        res.redirect('/partida/' + req.params.nombre);
+    }
 });
 
 module.exports = router;
