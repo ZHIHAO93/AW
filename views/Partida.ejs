@@ -8,7 +8,7 @@
 			<div class="FormPanel">
 				<p>
 					Creado por: <span class="negrita"><%= partida.Creador %></span> <br>
-                                        Jugadores: <span class="negrita"><%= partida.Participantes.substring(1,partida.Participantes.length) %></span> <br>
+                                        Jugadores: <span class="negrita"><%= partida.Participantes %></span> <br>
                                         Turno de: <span class="negrita"><%= partida.Turno %></span> <br>
                                         Turnos restantes: <span class="negrita"><%= partida.Max_turno %></span>
 				</p>
@@ -16,7 +16,6 @@
                         <h1>&#124Tablero</h1>
                         <div class="tablaPartida">
                             <table cellspacing="5">
-                                <% console.log("hola"); %>
                                 <% for(var fila=0; fila < 7; fila++) { %>
                                     <tr>
                                     <% for(var columna=0; columna < 7; columna++) { %>
@@ -39,15 +38,10 @@
                         <h1>&#124Tus cartas</h1>
                         <div class="tablaPartida">
                             <table>
-                                <% var nCarta = 0 %>
-                                <% if(numJugadores <= 5) { %>
-                                    <% nCarta = 6 %>
-                                <% } else { %>
-                                    <% nCarta = 5 %>
-                                <% } %>
                                 <tr>
                                 <% for(var i=0; i < nCarta; i++){ %>
-                                    <td><a class="UnirCerrar" href="/carta<%= i %>">&nbsp;</a></td>
+                                    <% var n = Math.floor(Math.random() * 15) + 1 %>
+                                    <td><a href="/partida/<%= partida.Nombre %>/carta<%= i %>"><img src="../images/T<%= cartas[i] %>.png"></img></a></td>
                                 <% } %>
                                 </tr>
                             </table>

@@ -33,11 +33,6 @@ router.get('/:Nick', function (req, res) {
             if(err) {
                 console.error(err.message);
             } else {
-                rowPartida.forEach(function(obj) {
-                    obj.Fecha = obj.Fecha.getFullYear().toString() + "-"
-                        + (obj.Fecha.getMonth() + 1).toString() + "-"
-                        + obj.Fecha.getDate().toString();
-                });
                 res.render('welcome', { jugador: jugador, partida: rowPartida });
             }
         });

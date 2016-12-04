@@ -42,6 +42,7 @@ router.get('/unirPartida', function(req, res) {
                     console.error(err.message);
                     res.redirect('/jugador/' + req.session.jugador.Nick);
             } else {
+                console.log(rowPartida);
                     res.render('unirPartida', { jugador: req.session.jugador, partida: rowPartida });
             }
     });
@@ -143,38 +144,74 @@ router.get('/cerrar/:partida', function(req, res) {
 
 router.get('/partida/:nombre', function(req, res) {
     var partida = new ModeloPartida("undefined");
-    partida.Nombre = req.params.nombre;
-    partida.read(function(err, rowPartida) {
+    partida.readActivas(req.params.nombre, function(err, rowPartida) {
         if(err) {
-            console.error("Error en abrir partida:" + req.params.nombre);
-            console.error("Con error: " + err.message);
+            console.error("Error en leer partida " + req.params.nombre + ": " + err.message);
             res.redirect('/jugador/' + req.session.jugador.Nick);
         } else {
-            if(rowPartida.length > 0) {
-                var participacion = new ModeloParticipacion("undefined");
-                participacion.Partida = partida.Nombre;
-                participacion.participantes(function(err, jugadores) {
-                    if(err){
-                        console.error("Error en leer los participantes");
-                        console.error("Con error: " + err.message);
-                        res.redirect('/jugador/' + req.session.jugador.Nick);
-                    } else {
-                        rowPartida[0].Participantes = "";
-                        jugadores.forEach(function(jugador, index, array){
-                            rowPartida[0].Participantes += "," + jugador.Jugador;
-                            if(index === array.length - 1){
-                                
-                                
-                                res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], numJugadores: jugadores.length } );
+            var nCarta = 0;
+            if(rowPartida[0].numJugadores <= 5) {
+                nCarta = 6;
+            } else {
+                nCarta = 5;
+            }
+            var carta = new ModeloCarta({Propietario: req.session.jugador.Nick, Partida: req.params.nombre});
+            carta.readCartasMano(function(err, rowCartas) {
+                if(err) {
+                    console.error("Error en consulta cartas en la mano: " + err.message);
+                } else {
+                    if(rowCartas.length === 0){
+                        carta.repartirCarta(nCarta, function(err, newCartas) {
+                            if(err){
+                                console.error("Error en repartir cartas: " + err.message);
+                            } else {
+                                res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: newCartas });
                             }
                         });
+                    } else {
+                        res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: rowCartas[0] } );
                     }
-                });
-            } else {
-                res.redirect('/jugador/' + req.session.jugador.Nick);
-            }
+                }
+            });
         }
     });
+//    partida.Nombre = req.params.nombre;
+//    partida.read(function(err, rowPartida) {
+//        if(err) {
+//            console.error("Error en abrir partida:" + req.params.nombre);
+//            console.error("Con error: " + err.message);
+//            res.redirect('/jugador/' + req.session.jugador.Nick);
+//        } else {
+//            if(rowPartida.length > 0) {
+//                var participacion = new ModeloParticipacion("undefined");
+//                participacion.Partida = partida.Nombre;
+//                participacion.participantes(function(err, jugadores) {
+//                    if(err){
+//                        console.error("Error en leer los participantes");
+//                        console.error("Con error: " + err.message);
+//                        res.redirect('/jugador/' + req.session.jugador.Nick);
+//                    } else {
+//                        rowPartida[0].Participantes = "";
+//                        jugadores.forEach(function(jugador, index, array){
+//                            rowPartida[0].Participantes += "," + jugador.Jugador;
+//                            if(index === array.length - 1){
+//                                var cartas = new ModeloCarta({Propietario: req.session.jugador.Nick, Partida: req.params.nombre });
+//                                cartas.readCartasMano(function(err, result){
+//                                    if(err){
+//                                        console.log("Error en consultar cartas en la mano: " + err.message);
+//                                    } else {
+//                                        res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], numJugadores: jugadores.length, cartas: result } );
+//                                    }
+//                                });
+//                            }
+//                        });
+//                    }
+//                });
+//            } else {
+//                res.redirect('/jugador/' + req.session.jugador.Nick);
+//            }
+//        }
+//    });
 });
 
 module.exports = router;

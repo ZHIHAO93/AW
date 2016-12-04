@@ -121,29 +121,15 @@ Partida.prototype.readAll = function(callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "Select * from partida",
+                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Estado, partida.Creador, partida.Turno, partida.Ganador, partida.Max_jugadores, count(participa.Jugador) as Num_jugadores \n\
+                                from partida, participa \n\
+                                where partida.Nombre = participa.Partida Group by partida.Nombre",
                             function(err, result) {
                                     if(err) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
-                                        if(result.length > 0){
-                                            result.forEach(function(partida, index, array){
-                                                var participa = new ModeloParticipacion({Partida: partida.Nombre});
-                                                participa.participantes(function(err, rowJugadores) {
-                                                    if(err) {
-                                                        callback(err, "undefined");
-                                                    } else {
-                                                        partida.Num_jugadores = rowJugadores.length;
-                                                        if(index === array.length - 1){
-                                                            callback(null, result);
-                                                        }
-                                                    }
-                                                });
-                                            });
-                                        } else {
-                                            callback(null, result);
-                                        }
+                                        callback(null, result);
                                     }
                             }
                     );
@@ -158,20 +144,39 @@ Partida.prototype.readAbiertas = function(callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "Select * from partida where estado = 'Abierta'",
+                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Max_jugadores, GROUP_CONCAT(participa.Jugador) as Participantes \n\
+                                from partida, participa \n\
+                                where partida.Estado='Abierta' and partida.Nombre = participa.Partida Group by partida.Nombre",
                             function(err, result) {
                                     if(err) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
-                                        result.forEach(function(obj, index, array){
-                                            obj.Fecha /= obj.Fecha.getFullYear().toString() + "-"
-                                                + (obj.Fecha.getMonth() + 1).toString() + "-"
-                                                + obj.Fecha.getDate().toString();
-                                            if(index === array.length - 1){
-                                                callback(null, result);
-                                            }
-                                        });
+                                        callback(null, result);
+                                    }
+                            }
+                    );
+		}
+	});
+};
+
+Partida.prototype.readActivas = function(partida, callback) {
+	var conexion = mysql.createConnection();
+	conexion.connect(function(err){
+		if(err) {
+                    callback(err, "undefined");
+		} else {
+                    conexion.query(
+                            "SELECT partida.*, GROUP_CONCAT(participa.Jugador) as Participantes, count(participa.Jugador) as numJugadores \n\
+                                from partida, participa \n\
+                                where partida.Nombre = ? and partida.Nombre = participa.Partida Group by partida.Nombre",
+                                partida,
+                            function(err, result) {
+                                    if(err) {
+                                        callback(err, "undefined");
+                                    } else {
+                                        conexion.end();
+                                        callback(null, result);
                                     }
                             }
                     );
