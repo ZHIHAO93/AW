@@ -109,6 +109,7 @@ Carta.prototype.repartirCarta = function(numCard, callback) {
                     if(err) {
                         callback(err, "undefined");
                     } else {
+                        console.log(result);
                         callback(null, newCartas);
                     }
                 });

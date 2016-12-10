@@ -173,7 +173,6 @@ router.get('/partida/:nombre', function(req, res) {
                                     }
                                 });
                             } else {
-                                console.log(cartaTabla);
                                 res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla } );
                             }
                         }
@@ -195,18 +194,98 @@ router.get('/partida/:nombre/casilla/:filaColumna', function(req, res) {
     var casilla = filaYcolumna.split('y');
     if(req.cookies.cartaSeleccionada){
         var carta = new ModeloCarta({ Fila: casilla[0], Columna: casilla[1], Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: req.cookies.cartaSeleccionada });
-        carta.ponerCarta(function(err, result) {
+        carta.readTabla(function(err, tabla) {
             if(err) {
-                console.error("Error en poner carta al casila: " + err.message);
+                console.error("Error en leer tabla " + err.message);
             } else {
-                res.clearCookie("cartaSeleccionada");
-                carta.repartirCarta(1, function(err, result) {
-                    if(err) {
-                        console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
-                    } else {
-                        res.redirect('/partida/' + req.params.nombre);
-                    }
-                });
+                if(tabla.length > 0) {
+                    var arriba = [1, 3, 5, 7, 9,11, 13, 15];
+                    var derecha = [8, 9, 10, 11, 12, 13, 14, 15];
+                    var abajo = [5, 6, 7, 12, 13, 14, 15];
+                    var izquierda = [2, 3, 6, 7, 10, 11, 14, 15];
+                    var filaCarta = parseInt(carta.Fila), colCarta = parseInt(carta.Columna);
+                    var correcto = true;
+                    tabla.forEach(function(obj, index, array){
+                            var p = parseInt(carta.Path);
+                            if(obj.Fila === filaCarta - 1 && obj.Columna === colCarta) { 
+                                if(arriba.indexOf(parseInt(obj.Path)) > -1 && abajo.indexOf(p) === -1){
+                                // arriba
+                                    console.error("arriba");
+                                    correcto = false;
+                                } else if(arriba.indexOf(parseInt(obj.Path)) === -1 && abajo.indexOf(p) > -1) {
+                                    console.error("arriba");
+                                    correcto = false;
+                                }
+                            }
+                            if(obj.Fila === filaCarta && obj.Columna === colCarta + 1){
+                                if(derecha.indexOf(parseInt(obj.Path)) > -1 && izquierda.indexOf(p) === -1){
+                                // derecha
+                                    console.error("derecha");
+                                    correcto = false;
+                                } else if(derecha.indexOf(parseInt(obj.Path)) === -1 && izquierda.indexOf(p) > -1) {
+                                    console.error("derecha");
+                                    correcto = false;
+                                }
+                            }
+                            if(obj.Fila === filaCarta + 1 && obj.Columna === colCarta){
+                                if(abajo.indexOf(parseInt(obj.Path)) > -1 && arriba.indexOf(p) === -1){
+                                    // abajo
+                                    console.error("abajo1");
+                                    correcto = false;
+                                } else if(abajo.indexOf(parseInt(obj.Path)) === -1 && arriba.indexOf(p) > -1) {
+                                    console.error("abajo2");
+                                    correcto = false;
+                                }
+                            }
+                            
+                            if(obj.Fila === filaCarta && obj.Columna === colCarta - 1){
+                                if(izquierda.indexOf(parseInt(obj.Path)) > -1 && derecha.indexOf(p) === -1){
+                                // izquierda
+                                    console.error("izquierda");
+                                    correcto = false;
+                                } else if(izquierda.indexOf(parseInt(obj.Path)) === -1 && derecha.indexOf(p) > -1) {
+                                    console.error("izquierda");
+                                    correcto = false;
+                                }
+                            }
+                            
+                        if (index === array.length - 1) {
+                            if(correcto){
+                                carta.ponerCarta(function(err, result) {
+                                    if(err) {
+                                        console.error("Error en poner carta al casila: " + err.message);
+                                    } else {
+                                        res.clearCookie("cartaSeleccionada");
+                                        carta.repartirCarta(1, function(err, result) {
+                                            if(err) {
+                                                console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
+                                            } else {
+                                                res.redirect('/partida/' + req.params.nombre);
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                res.redirect('/partida/' + req.params.nombre);
+                            }
+                        }
+                    });
+                } else {
+                    carta.ponerCarta(function(err, result) {
+                        if(err) {
+                            console.error("Error en poner carta al casila: " + err.message);
+                        } else {
+                            res.clearCookie("cartaSeleccionada");
+                            carta.repartirCarta(1, function(err, result) {
+                                if(err) {
+                                    console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
+                                } else {
+                                    res.redirect('/partida/' + req.params.nombre);
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
     } else {
