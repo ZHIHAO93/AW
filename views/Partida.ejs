@@ -21,16 +21,22 @@
                                     <tr>
                                     <% for(var columna=0; columna < 7; columna++) { %>
                                         <% if(i < cartasTabla.length && fila === cartasTabla[i].Fila && columna === cartasTabla[i].Columna) {%>
-                                            <td><img src="../images/T<%= cartasTabla[i].Path %>.png"></img></td>
-                                            <% i++; %>
-                                        <% }else if(fila === 3 && columna ===0) { %>
-                                             <td><img src="../images/start.png"></img></td>
-                                        <% } else if(columna === 6) { %>
-                                            <% if(fila === 1 || fila === 3 || fila === 5) { %>
-                                                <td><img src="../images/DNK.png"></img></td>
+                                            <% if(fila === 3 && columna ===0) { %>
+                                                <td><img src="../images/start.png"></img></td>
+                                            <% } else if(columna === 6 && (fila === 1 || fila === 3 || fila === 5)) { %>
+                                                <% if (partida.Estado === 'Terminada') {%>
+                                                    <% if (partida.PosOro === fila) {%>
+                                                        <td><img src="../images/Gold.png"></img></td>
+                                                    <% } else { %>
+                                                        <td><img src="../images/noGold.png"></img></td>
+                                                    <% } %>
+                                                <% } else {%>
+                                                    <td><img src="../images/DNK.png"></img></td>
+                                                <% } %>
                                             <% } else { %>
-                                             <td><a href="/partida/<%= partida.Nombre %>/casilla/<%= fila %>y<%= columna %> "><img src="../images/cardImg2.jpg"></img></a></td>
-                                             <% } %>
+                                                <td><img src="../images/T<%= cartasTabla[i].Path %>.png"></img></td>
+                                            <% } %>
+                                            <% i++; %>
                                        <% } else { %>
                                                <td><a href="/partida/<%= partida.Nombre %>/casilla/<%= fila %>y<%= columna %> "><img src="../images/cardImg2.jpg"></img></a></td>
                                          <% } %>
@@ -39,20 +45,27 @@
                                 <% } %>
                             </table>
                         </div>
-                        <h1>&#124Tus cartas</h1>
-                        <div class="tablaPartida">
-                            <table>
-                                <tr>
-                                <% for(var i=0; i < nCarta; i++){ %>
-                                    <% if(jugador.Nick === partida.Turno) { %>
-                                    <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/T<%= cartas[i].Path %>.png"></img></a></td>
-                                    <% } else { %>
-                                    <td><img src="../images/T<%= cartas[i].Path %>.png"></img></td>
+                        <% if (partida.Estado !== 'Terminada') {%>
+                            <h1>&#124Tus cartas</h1>
+                            <div class="tablaPartida">
+                                <table>
+                                    <tr>
+                                    <% for(var i=0; i < nCarta; i++){ %>
+                                        <% if(jugador.Nick === partida.Turno) { %>
+                                        <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/T<%= cartas[i].Path %>.png"></img></a></td>
+                                        <% } else { %>
+                                        <td><img src="../images/T<%= cartas[i].Path %>.png"></img></td>
+                                        <% } %>
                                     <% } %>
-                                <% } %>
-                                </tr>
-                            </table>
-                        </div>
+                                    </tr>
+                                </table>
+                            </div>
+                            <% if(jugador.Nick !== partida.Turno) { %>
+                                <div class="Turno">
+                                <span class="Resalta">Aún no es tu turno. Debes esperar para jugar una carta.</span>
+                                </div>
+                            <% } %>
+                        <% } %>
 		</div>
 		</div>
 	</div>

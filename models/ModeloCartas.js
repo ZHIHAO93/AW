@@ -12,6 +12,31 @@ function Carta(carta){
     this.Estado = carta.Estado;
 }
 
+Carta.prototype.ponerCartasIniciales = function(callback) {
+    var conexion = mysql.createConnection();
+    var partida = this.Partida;
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            var query = "Insert into carta (Fila, Columna, Partida, Path, Estado) values "
+                        + "(3, 0, '" + partida + "', 15, 'Tabla'),"
+                        + "(1, 6, '" + partida + "', 15, 'Tabla'),"
+                        + "(3, 6, '" + partida + "', 15, 'Tabla'),"
+                        + "(5, 6, '" + partida + "', 15, 'Tabla')";
+            conexion.query(
+                query,
+                function(err, result) {
+                    if(err) {
+                        callback(err, "undefined");
+                    } else {
+                        callback(null, result);
+                    }
+                });
+        }
+    });
+};
+
 Carta.prototype.ponerCarta = function(callback) {
     var conexion = mysql.createConnection();
     var carta = this;
@@ -80,15 +105,18 @@ Carta.prototype.readCartasMano = function(callback) {
     });
 };
 
-Carta.prototype.repartirCarta = function(numCard, callback) {
+Carta.prototype.repartirCarta = function(numCard, CartasEnMano, callback) {
     var conexion = mysql.createConnection();
     var nuevaCarta = this;
     conexion.connect(function(err) {
         if(err) {
             callback(err, "undefined");
         } else {
-            var newCartas = [];
+            var newCartas = CartasEnMano;
             var valor = [];
+            newCartas.forEach(function(obj) {
+                valor.push(parseInt(obj.Path));
+            });
             var n;
             var query = "Insert into carta (Propietario, Partida, Path, Estado) values ";
             for(var i=0;i<numCard;i++) {
@@ -109,7 +137,6 @@ Carta.prototype.repartirCarta = function(numCard, callback) {
                     if(err) {
                         callback(err, "undefined");
                     } else {
-                        console.log(result);
                         callback(null, newCartas);
                     }
                 });

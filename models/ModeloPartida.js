@@ -13,25 +13,49 @@ function Partida(partida) {
     this.Ganador = "";
     this.Max_jugadores = partida.Max_jugadores;
     var numTurno = -1;
-    switch(this.Max_jugadores) {
-        case "3":
+    switch(parseInt(partida.Max_jugadores)) {
+        case 3:
             numTurno = 50;
             break;
-        case "4":
+        case 4:
             numTurno = 45;
             break;
-        case "5":
-        case "6":
+        case 5:
+        case 6:
             numTurno = 40;
             break;
-        case "7":
+        case 7:
             numTurno = 35;
             break;
         default:
             break;
     }
     this.Max_turno = numTurno;
+    this.PosOro = partida.PosOro;
 }
+
+Partida.prototype.terminarPartida = function(ganador, callback) {
+    var conexion = mysql.createConnection();
+    var partida = this.Nombre;
+    conexion.connect(function(err) {
+        if (err) {
+            callback(err, "undefined");
+        } else {
+            var query = "update partida p, Participa pa set p.Ganador = pa.Role, p.Estado = 'Terminada' where p.Nombre = '"
+                    + partida + "' and p.Nombre = pa.Partida and pa.Jugador = '" + ganador + "'";
+            conexion.query(
+                    query,
+                    function(err, result) {
+                        if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            callback(null, result);
+                        }
+                    }
+            );
+        }
+    });
+};
 
 Partida.prototype.create = function(callback) {
   var conexion = mysql.createConnection();

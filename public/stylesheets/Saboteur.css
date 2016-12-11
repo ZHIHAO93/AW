@@ -178,3 +178,8 @@ button {
 .negrita {
     font-weight: bold;
 }
+
+.Turno {
+    color: #663300;
+    text-align: center;
+}
