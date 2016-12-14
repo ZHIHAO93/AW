@@ -12,6 +12,27 @@ function Carta(carta){
     this.Estado = carta.Estado;
 }
 
+Carta.prototype.eliminarCarta = function(callback) {
+    var conexion = mysql.createConnection();
+    var carta = this;
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            var query = "Delete from carta where Propietario = '" + carta.Propietario + "' and Partida = '" + carta.Partida + "' and Path = '" + carta.Path + "'";
+            conexion.query(
+                query,
+                function(err, result) {
+                    if(err) {
+                        callback(err, "undefined");
+                    } else {
+                        callback(null, result);
+                    }
+            });
+        }
+    });
+};
+
 Carta.prototype.ponerCartasIniciales = function(callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;

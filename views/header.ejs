@@ -42,8 +42,8 @@
 					<td></td>
 				</tr>
 				<tr>
-					<td><input class="TextField" type="text" name="Nick" id="Nick"></td>
-					<td><input class="TextField" type="password" name="Password" id="Password"></td>
+					<td><input class="TextField" type="text" name="Nick" id="Nick" required></td>
+					<td><input class="TextField" type="password" name="Password" id="Password" required></td>
 					<td><input type="submit" name="submit" value="Identificarse"></td>
 				</tr>
 			</table>
@@ -53,3 +53,13 @@
 	</header>
 
 	<div class="Barra"></div>
+        <% if(error) {%>
+            <div class="Error">
+                <h1> Error! </h1>
+                <ul>
+                <% error.forEach(function(obj) { %>
+                    <li><%= obj %></li>
+                <% }); %>
+                </ul>
+            </div>
+        <% } %>

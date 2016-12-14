@@ -21,3 +21,13 @@
     width: 80px;
     height: 80px;
 }
+
+.cambiaCarta table {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.cambiaCarta td {
+    padding: 12px;
+}

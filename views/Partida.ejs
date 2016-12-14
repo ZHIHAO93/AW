@@ -34,7 +34,7 @@
                                                     <td><img src="../images/DNK.png"></img></td>
                                                 <% } %>
                                             <% } else { %>
-                                                <td><img src="../images/T<%= cartasTabla[i].Path %>.png"></img></td>
+                                                <td><img src="../images/T<%= cartasTabla[i].Path %>.png" title = "<%= cartasTabla[i].Propietario %>"></img></td>
                                             <% } %>
                                             <% i++; %>
                                        <% } else { %>
@@ -60,6 +60,17 @@
                                     </tr>
                                 </table>
                             </div>
+                            <% if (jugador.Nick === partida.Turno) {%>
+                                <div class="cambiaCarta">
+                                    <table>
+                                        <tr>
+                                            <% for(var i=0; i < nCarta; i++){ %>
+                                                <td><a href="/partida/<%= partida.Nombre %>/cambiar/<%= cartas[i].Path %>"><input type="button" value="cambiar"></a></td>
+                                            <% } %>
+                                        </tr>
+                                    </table>
+                                </div>
+                            <% } %>
                             <% if(jugador.Nick !== partida.Turno) { %>
                                 <div class="Turno">
                                 <span class="Resalta">Aún no es tu turno. Debes esperar para jugar una carta.</span>

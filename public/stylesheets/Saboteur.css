@@ -1,13 +1,14 @@
-@import url('https://fonts.googleapis.com/css?family=Special+Elite|Open+Sans|Roboto');
+/*@import url('https://fonts.googleapis.com/css?family=Special+Elite|Open+Sans|Roboto');*/
 /* Estilo de componentes */
 body {
     background: url("../images/portada1.jpg") repeat-y;
     background-size: 100%;
     margin: auto;
+    font-family: Arial;
     /*
     font-family: 'Special Elite', cursive;
-    font-family: 'Roboto', sans-serif;*/
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Roboto', sans-serif;
+    font-family: 'Open Sans', sans-serif;*/
 }
 
 header {
@@ -182,4 +183,14 @@ button {
 .Turno {
     color: #663300;
     text-align: center;
+}
+
+.Error {
+    position: relative;
+    background-color: #ff8566;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 20px;
+    padding-bottom: 20px;
+    overflow: hidden;
 }

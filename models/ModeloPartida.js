@@ -138,16 +138,16 @@ Partida.prototype.read = function(callback) {
 	});
 };
 
-Partida.prototype.readAll = function(callback) {
+Partida.prototype.readAll = function(jugador, callback) {
 	var conexion = mysql.createConnection();
 	conexion.connect(function(err){
 		if(err) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Estado, partida.Creador, partida.Turno, partida.Ganador, partida.Max_jugadores, count(participa.Jugador) as Num_jugadores \n\
+                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Estado, partida.Creador, partida.Turno, partida.Ganador, partida.Max_jugadores, count(participa.Jugador) as Num_jugadores, participa.Role \n\
                                 from partida, participa \n\
-                                where partida.Nombre = participa.Partida Group by partida.Nombre",
+                                where partida.Nombre = participa.Partida and participa.Jugador = '" + jugador + "' Group by partida.Nombre",
                             function(err, result) {
                                     if(err) {
                                         callback(err, "undefined");

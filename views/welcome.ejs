@@ -73,7 +73,7 @@
 										<tr>
 											<td><a class="nomParti" href="/partida/<%= parti.Nombre %>"><%= parti.Nombre %></a></td>
 											<td><%= parti.Creador %></td>
-											<% if (parti.Ganador === jugador) {%>
+											<% if (parti.Ganador === parti.Role) {%>
 												<td>SI</td>
 											<% } else {%>
 												<td>NO</td>
