@@ -18,17 +18,18 @@
 								<tr>
 									<th>Nombre</th><th>Fecha</th><th class="numJugadores">Número de jugadores</th>	
 								</tr>
-								<% partida.forEach(function(parti) { %>
-									<% if (parti.Estado === "Abierta") {%>
-										<tr>
-											<td><%= parti.Nombre %></td>
-											<td><%= parti.Fecha %></td>
-											<td><%= parti.Num_jugadores %>/<%= parti.Max_jugadores %></td>
-											<% if (parti.Creador === jugador.Nick && parti.Num_jugadores >= 3) {%>
-                                                                                                <td><a class="UnirCerrar" href="/cerrar/<%= parti.Nombre %>">Cerrar</a></td>
-											<% } %>
-										</tr>
-									<% } %>
+								<% partidaAbiertas.forEach(function(parti) { %>
+                                                                    <% if (parti.Creador === jugador.Nick) {%>
+                                                                        <% var participantes = parti.Participantes.split(',') %>
+                                                                        <tr>
+                                                                                <td><%= parti.Nombre %></td>
+                                                                                <td><%= parti.Fecha %></td>
+                                                                                <td><%= participantes.length %>/<%= parti.Max_jugadores %></td>
+                                                                                <% if (parti.Creador === jugador.Nick && parti.Num_jugadores >= 3) {%>
+                                                                                        <td><a class="UnirCerrar" href="/cerrar/<%= parti.Nombre %>">Cerrar</a></td>
+                                                                                <% } %>
+                                                                        </tr>
+                                                                    <% } %>
 								<% }) %>
 							</table>
 						</div>

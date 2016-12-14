@@ -140,6 +140,7 @@ Partida.prototype.read = function(callback) {
 
 Partida.prototype.readAll = function(jugador, callback) {
 	var conexion = mysql.createConnection();
+        var p = this;
 	conexion.connect(function(err){
 		if(err) {
                     callback(err, "undefined");
@@ -153,7 +154,13 @@ Partida.prototype.readAll = function(jugador, callback) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
-                                        callback(null, result);
+                                        p.readAbiertas(function(err, resultAbiertas) {
+                                            if(err) {
+                                                callback(err, "undefined");
+                                            } else {
+                                                callback(null, result, resultAbiertas);
+                                            }
+                                        });
                                     }
                             }
                     );
@@ -168,7 +175,7 @@ Partida.prototype.readAbiertas = function(callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Max_jugadores, GROUP_CONCAT(participa.Jugador) as Participantes \n\
+                            "SELECT partida.Nombre, partida.Creador, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Max_jugadores, GROUP_CONCAT(participa.Jugador) as Participantes \n\
                                 from partida, participa \n\
                                 where partida.Estado='Abierta' and partida.Nombre = participa.Partida Group by partida.Nombre",
                             function(err, result) {

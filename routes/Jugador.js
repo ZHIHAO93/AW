@@ -29,12 +29,12 @@ router.get('/:Nick', function (req, res) {
     if(req.session.jugador) {
         var jugador = new ModeloJugador(req.session.jugador);
         var partida = new ModeloPartida("undefined");
-        partida.readAll(req.session.jugador.Nick, function(err, rowPartida) {
+        partida.readAll(req.session.jugador.Nick, function(err, rowPartida, rowAbiertas) {
             if(err) {
                 console.error(err.message);
-                res.render('welcome', { jugador: jugador, partida: rowPartida, error: [err.message]});
+                res.render('welcome', { jugador: jugador, partida: rowPartida, partidaAbiertas: rowAbiertas, error: [err.message]});
             } else {
-                res.render('welcome', { jugador: jugador, partida: rowPartida, error: null });
+                res.render('welcome', { jugador: jugador, partida: rowPartida, partidaAbiertas: rowAbiertas, error: null });
             }
         });
     } else {
