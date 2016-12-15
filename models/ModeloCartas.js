@@ -10,6 +10,7 @@ function Carta(carta){
     this.Partida = carta.Partida,
     this.Path = carta.Path,
     this.Estado = carta.Estado;
+    this.Visible = 0;
 }
 
 Carta.prototype.eliminarCarta = function(callback) {
@@ -40,11 +41,11 @@ Carta.prototype.ponerCartasIniciales = function(callback) {
         if(err) {
             callback(err, "undefined");
         } else {
-            var query = "Insert into carta (Fila, Columna, Partida, Path, Estado) values "
-                        + "(3, 0, '" + partida + "', 15, 'Tabla'),"
-                        + "(1, 6, '" + partida + "', 15, 'Tabla'),"
-                        + "(3, 6, '" + partida + "', 15, 'Tabla'),"
-                        + "(5, 6, '" + partida + "', 15, 'Tabla')";
+            var query = "Insert into carta (Fila, Columna, Partida, Path, Estado, Visible) values "
+                        + "(3, 0, '" + partida + "', 'T15', 'Tabla', 0),"
+                        + "(1, 6, '" + partida + "', 'T15', 'Tabla', 0),"
+                        + "(3, 6, '" + partida + "', 'T15', 'Tabla', 0),"
+                        + "(5, 6, '" + partida + "', 'T15', 'Tabla', 0)";
             conexion.query(
                 query,
                 function(err, result) {
@@ -142,11 +143,28 @@ Carta.prototype.repartirCarta = function(numCard, CartasEnMano, callback) {
             var query = "Insert into carta (Propietario, Partida, Path, Estado) values ";
             for(var i=0;i<numCard;i++) {
                 var obj = {};
-                n = Math.floor(Math.random() * 15) + 1;
+                n = Math.floor(Math.random() * 19) + 1;
                 while(valor.indexOf(n) > -1){
-                    n = Math.floor(Math.random() * 15) + 1;
+                    n = Math.floor(Math.random() * 19) + 1;
                 }
                 valor.push(n);
+                switch(n) {
+                    case 16:
+                        n = "Lupa";
+                        break;
+                    case 17:
+                        n = "Bomba";
+                        break;
+                    case 18:
+                        n = "PicoArreglado";
+                        break;
+                    case 19:
+                        n = "PicoRoto";
+                        break;
+                    default:
+                        n = "T" + n;
+                        break;          
+                }
                 obj.Path = n;
                 newCartas.push(obj);
                 query += "('" + nuevaCarta.Propietario + "', '" + nuevaCarta.Partida + "', '" + n + "','Mano'),";

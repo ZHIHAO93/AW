@@ -1,0 +1,28 @@
+<%- include header %>
+
+	<div class="Contenedor">
+		<div class="TextoFondo"></div>
+
+		<div class="Contenido">
+			<div class="FormPanel">
+				<p>
+                                    <% if (pico === "PicoArreglado") {%>
+					Seleccionar el jugador que deseas arreglar el pico.
+                                    <% } else { %>
+                                        Seleccionar el jugador que deseas romper el pico.
+                                    <% } %>
+				</p>
+				<form action="/crearPartida" method="post">
+					<table>
+                                            <% estados.forEach(function(obj) { %>
+                                                <tr>
+                                                    <td><a class="nomParti" href="/partida/<%= partida %>/usarHerPico/<%= pico %>/<%= obj.Jugador %>"><%= obj.Jugador %></a><td>
+                                                </tr>
+                                            <% }) %>
+					</table>
+				</form>
+			</div>
+		</div>
+		</div>
+	</div>
+<%- include footer %>

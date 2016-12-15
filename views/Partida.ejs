@@ -10,7 +10,9 @@
 					Creado por: <span class="negrita"><%= partida.Creador %></span> <br>
                                         Jugadores: <span class="negrita"><%= partida.Participantes %></span> <br>
                                         Turno de: <span class="negrita"><%= partida.Turno %></span> <br>
-                                        Turnos restantes: <span class="negrita"><%= partida.Max_turno %></span>
+                                        Turnos restantes: <span class="negrita"><%= partida.Max_turno %></span> <br>
+                                        Role: <span class="negrita"><%= roleHerra.Role %></span> <br>
+                                        Herramienta: <span class="negrita"><%= roleHerra.Herramienta %></span>
 				</p>
 			</div>
                         <h1>&#124Tablero</h1>
@@ -34,7 +36,7 @@
                                                     <td><img src="../images/DNK.png"></img></td>
                                                 <% } %>
                                             <% } else { %>
-                                                <td><img src="../images/T<%= cartasTabla[i].Path %>.png" title = "<%= cartasTabla[i].Propietario %>"></img></td>
+                                                <td><img src="../images/<%= cartasTabla[i].Path %>.png" title = "<%= cartasTabla[i].Propietario %>"></img></td>
                                             <% } %>
                                             <% i++; %>
                                        <% } else { %>
@@ -52,9 +54,15 @@
                                     <tr>
                                     <% for(var i=0; i < nCarta; i++){ %>
                                         <% if(jugador.Nick === partida.Turno) { %>
-                                        <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/T<%= cartas[i].Path %>.png"></img></a></td>
+                                            <% if(cartas[i].Path[0] === 'T' && roleHerra.Herramienta === "SI") { %>
+                                                <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/<%= cartas[i].Path %>.png"></img></a></td>
+                                            <% } else if(cartas[i].Path[0] !== 'T'){ %>
+                                                <td><a href="/partida/<%= partida.Nombre %>/herramienta/<%= cartas[i].Path %>"><img src="../images/<%= cartas[i].Path %>.png"></img></a></td>
+                                            <% } else {%>
+                                                <td><img src="../images/<%= cartas[i].Path %>.png"></img></td>
+                                            <% } %>
                                         <% } else { %>
-                                        <td><img src="../images/T<%= cartas[i].Path %>.png"></img></td>
+                                        <td><img src="../images/<%= cartas[i].Path %>.png"></img></td>
                                         <% } %>
                                     <% } %>
                                     </tr>

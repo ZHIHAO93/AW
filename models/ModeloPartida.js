@@ -191,7 +191,7 @@ Partida.prototype.readAbiertas = function(callback) {
 	});
 };
 
-Partida.prototype.readActivas = function(partida, callback) {
+Partida.prototype.readActivas = function(partida, jugador, callback) {
 	var conexion = mysql.createConnection();
 	conexion.connect(function(err){
 		if(err) {
@@ -202,12 +202,20 @@ Partida.prototype.readActivas = function(partida, callback) {
                                 from partida, participa \n\
                                 where partida.Nombre = ? and partida.Nombre = participa.Partida Group by partida.Nombre",
                                 partida,
-                            function(err, result) {
+                            function(err, rowPartida) {
                                     if(err) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
-                                        callback(null, result);
+                                        var participa = new ModeloParticipacion({Jugador: jugador, Partida: partida});
+                                        console.log(participa);
+                                        participa.roleYHerramienta(function(err, roleHerra) {
+                                            if(err) {
+                                                callback(err, "undefined");
+                                            } else {
+                                                callback(null, rowPartida, roleHerra[0]);
+                                            }
+                                        });
                                     }
                             }
                     );
