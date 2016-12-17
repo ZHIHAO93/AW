@@ -3,6 +3,7 @@ var router = express.Router();
 var ModeloPartida = require('../models/ModeloPartida');
 var ModeloParticipacion = require('../models/ModeloParticipa');
 var ModeloCarta = require('../models/ModeloCartas');
+var ModeloComentario = require('../models/ModeloComentarios');
 
 router.get('/crearPartida', function(req, res, next) {
     if(req.cookies.error){
@@ -186,34 +187,40 @@ router.get('/partida/:nombre', function(req, res) {
                 if(err) {
                     console.error("Error en leer las cartas de la tabla: " + err.message);
                 } else {
-                    carta.readCartasMano(function(err, rowCartas) {
+                    var comentario = new ModeloComentario({ Jugador: req.session.jugador.Nick, Comentario: req.body.Comentario, Partida: req.params.nombre });
+                    comentario.ReadAll(function(err, rowComentarios) {
                         if(err) {
-                            console.error("Error en consulta cartas en la mano: " + err.message);
+                            console.error("Error en leer los comentarios: " + err.message);
                         } else {
-                            if(rowCartas.length === 0){
-                                carta.repartirCarta(nCarta, [], function(err, newCartas) {
-                                    if(err){
-                                        console.error("Error en repartir cartas: " + err.message);
+                            carta.readCartasMano(function(err, rowCartas) {
+                                if(err) {
+                                    console.error("Error en consulta cartas en la mano: " + err.message);
+                                } else {
+                                    if(rowCartas.length === 0){
+                                        carta.repartirCarta(nCarta, [], function(err, newCartas) {
+                                            if(err){
+                                                console.error("Error en repartir cartas: " + err.message);
+                                            } else {
+                                                if(req.cookies.error){
+                                                    var error = [req.cookies.error];
+                                                    res.clearCookie("error");
+                                                    res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: newCartas, cartasTabla: cartaTabla, herra: req.cookies.cartaSeleccionada, comentarios: rowComentarios, error: error });
+                                                } else {
+                                                    res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: newCartas, cartasTabla: cartaTabla, herra: req.cookies.cartaSeleccionada, comentarios: rowComentarios, error: null });
+                                                }
+                                            }
+                                        });
                                     } else {
-                                        if(req.cookies.error){
+                                        if(req.cookies.error) {
                                             var error = [req.cookies.error];
                                             res.clearCookie("error");
-                                            res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: newCartas, cartasTabla: cartaTabla, error: error });
+                                            res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla, herra: req.cookies.cartaSeleccionada, comentarios: rowComentarios, error: error } );
                                         } else {
-                                            res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: newCartas, cartasTabla: cartaTabla, error: null });
+                                            res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla, herra: req.cookies.cartaSeleccionada,  comentarios: rowComentarios, error: null } );
                                         }
                                     }
-                                });
-                            } else {
-                                if(req.cookies.error) {
-                                    var error = [req.cookies.error];
-                                    res.clearCookie("error");
-                                    res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla, error: error } );
-                                } else {
-                                    console.log(role);
-                                    res.render('Partida', { jugador: req.session.jugador, partida: rowPartida[0], roleHerra: role, nCarta: nCarta, cartas: rowCartas, cartasTabla: cartaTabla, error: null } );
                                 }
-                            }
+                            });
                         }
                     });
                 }
@@ -228,32 +235,7 @@ router.get('/partida/:nombre/:carta', function(req, res) {
     res.redirect('/partida/' + req.params.nombre);
 });
 
-router.get('/partida/:nombre/herramienta/:nombreHer', function(req, res) {
-    var her =  req.params.nombreHer;
-    console.log("seleccionar la herramienta " + her);
-    
-    var daoCarta = new ModeloCarta({ Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: her, Estado: "Mano" });
-    switch(her) {
-        case "Lupa":
-            console.log("lupa");
-            break;
-        case "Bomba":
-            console.log("Bomba");
-            break;
-        case "PicoArreglado":
-        case "PicoRoto":
-            res.redirect('/partida/' + req.params.nombre + "/hera/" + her);
-            break;
-        default:
-            res.redirect('/partida/' + req.params.nombre);
-            break;
-    }
-    
-    //res.cookie("herramientaSeleccionada", her);
-    //res.redirect('/partida/' + req.params.nombre);
-});
-
-router.get('/partida/:nombre/hera/:pico', function(req, res) {
+router.get('/partida/:nombre/herramienta/:pico', function(req, res) {
     var part = new ModeloParticipacion({ Partida: req.params.nombre });
     var estadoHer = "";
     if(req.params.pico === "PicoArreglado") {
@@ -343,189 +325,221 @@ router.get('/partida/:nombre/cambiar/:carta', function(req, res) {
 router.get('/partida/:nombre/casilla/:filaColumna', function(req, res) {
     var filaYcolumna = req.params.filaColumna;
     var casilla = filaYcolumna.split('y');
-    if(req.cookies.cartaSeleccionada){
-        var carta = new ModeloCarta({ Fila: casilla[0], Columna: casilla[1], Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: req.cookies.cartaSeleccionada });
-        carta.readTabla(function(err, tabla) {
-            if(err) {
-                console.error("Error en leer tabla " + err.message);
-            } else {
-                if(tabla.length > 0) {
-                    var arriba = ['T1', 'T3', 'T5', 'T7', 'T9','T11', 'T13', 'T15'];
-                    var derecha = ['T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14', 'T15'];
-                    var abajo = ['T5', 'T6', 'T7', 'T12', 'T13', 'T14', 'T15'];
-                    var izquierda = ['T2', 'T3', 'T6', 'T7', 'T10', 'T11', 'T14', 'T15'];
-                    var filaCarta = parseInt(carta.Fila), colCarta = parseInt(carta.Columna);
-                    var correcto = true;
-                    var cartaAlLado = false;
-                    tabla.forEach(function(obj, index, array){
-                            var p = carta.Path;
-                            if(obj.Fila === filaCarta - 1 && obj.Columna === colCarta) { 
-                                if(arriba.indexOf(obj.Path) > -1 && abajo.indexOf(p) === -1){
-                                // arriba
-                                    console.error("arriba");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
-                                } else if(arriba.indexOf(obj.Path) === -1 && abajo.indexOf(p) > -1) {
-                                    console.error("arriba");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
+    var carta = new ModeloCarta({ Fila: casilla[0], Columna: casilla[1], Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: req.cookies.cartaSeleccionada });
+    if(req.cookies.cartaSeleccionada) {
+        if(req.cookies.cartaSeleccionada === "Lupa") {
+            carta.Lupa(function(err, result) {
+                if(err) {
+                    console.error("error en usar lupa: " + err.message);
+                } else {
+                    res.redirect('/partida/' + req.params.nombre + '/cambiar/' + req.cookies.cartaSeleccionada);
+                }
+            });
+        } else if(req.cookies.cartaSeleccionada === 'Bomba') {
+            carta.Bombardear(function(err, result) {
+                if(err) {
+                    console.error("error en usar bomba: " + err.message);
+                } else {
+                    res.redirect('/partida/' + req.params.nombre + '/cambiar/' + req.cookies.cartaSeleccionada);
+                }
+            });
+        }
+        else {
+            carta.readTabla(function(err, tabla) {
+                if(err) {
+                    console.error("Error en leer tabla " + err.message);
+                } else {
+                    if(tabla.length > 0) {
+                        var arriba = ['T1', 'T3', 'T5', 'T7', 'T9','T11', 'T13', 'T15'];
+                        var derecha = ['T8', 'T9', 'T10', 'T11', 'T12', 'T13', 'T14', 'T15'];
+                        var abajo = ['T4', 'T5', 'T6', 'T7', 'T12', 'T13', 'T14', 'T15'];
+                        var izquierda = ['T2', 'T3', 'T6', 'T7', 'T10', 'T11', 'T14', 'T15'];
+                        var filaCarta = parseInt(carta.Fila), colCarta = parseInt(carta.Columna);
+                        var correcto = true;
+                        var cartaAlLado = false;
+                        tabla.forEach(function(obj, index, array){
+                                var p = carta.Path;
+                                if(obj.Fila === filaCarta - 1 && obj.Columna === colCarta) { 
+                                    if(arriba.indexOf(obj.Path) > -1 && abajo.indexOf(p) === -1){
+                                    // arriba
+                                        console.error("arriba");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    } else if(arriba.indexOf(obj.Path) === -1 && abajo.indexOf(p) > -1) {
+                                        console.error("arriba2");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    }
+                                    cartaAlLado = true;
                                 }
-                                cartaAlLado = true;
-                            }
-                            if(obj.Fila === filaCarta && obj.Columna === colCarta + 1){
-                                if(derecha.indexOf(obj.Path) > -1 && izquierda.indexOf(p) === -1){
-                                // derecha
-                                    console.error("derecha");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
-                                } else if(derecha.indexOf(obj.Path) === -1 && izquierda.indexOf(p) > -1) {
-                                    console.error("derecha");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
+                                if(obj.Fila === filaCarta && obj.Columna === colCarta + 1){
+                                    if(derecha.indexOf(obj.Path) > -1 && izquierda.indexOf(p) === -1){
+                                    // derecha
+                                        console.error("derecha");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    } else if(derecha.indexOf(obj.Path) === -1 && izquierda.indexOf(p) > -1) {
+                                        console.error("derecha");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    }
+                                    cartaAlLado = true;
                                 }
-                                cartaAlLado = true;
-                            }
-                            if(obj.Fila === filaCarta + 1 && obj.Columna === colCarta){
-                                if(abajo.indexOf(obj.Path) > -1 && arriba.indexOf(p) === -1){
-                                    // abajo
-                                    console.error("abajo");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
-                                } else if(abajo.indexOf(obj.Path) === -1 && arriba.indexOf(p) > -1) {
-                                    console.error("abajo");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
+                                if(obj.Fila === filaCarta + 1 && obj.Columna === colCarta){
+                                    if(abajo.indexOf(obj.Path) > -1 && arriba.indexOf(p) === -1){
+                                        // abajo
+                                        console.error("abajo");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    } else if(abajo.indexOf(obj.Path) === -1 && arriba.indexOf(p) > -1) {
+                                        console.error("abajo");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    }
+                                    cartaAlLado = true;
                                 }
-                                cartaAlLado = true;
-                            }
-                            
-                            if(obj.Fila === filaCarta && obj.Columna === colCarta - 1){
-                                if(izquierda.indexOf(obj.Path) > -1 && derecha.indexOf(p) === -1){
-                                // izquierda
-                                    console.error("izquierda");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
-                                } else if(izquierda.indexOf(obj.Path) === -1 && derecha.indexOf(p) > -1) {
-                                    console.error("izquierda");
-                                    res.cookie("error", "posicion incorrecta");
-                                    correcto = false;
+
+                                if(obj.Fila === filaCarta && obj.Columna === colCarta - 1){
+                                    if(izquierda.indexOf(obj.Path) > -1 && derecha.indexOf(p) === -1){
+                                    // izquierda
+                                        console.error("izquierda");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    } else if(izquierda.indexOf(obj.Path) === -1 && derecha.indexOf(p) > -1) {
+                                        console.error("izquierda");
+                                        res.cookie("error", "posicion incorrecta");
+                                        correcto = false;
+                                    }
+                                    cartaAlLado = true;
                                 }
-                                cartaAlLado = true;
-                            }
-                            
-                        if (index === array.length - 1) {
-                            if(correcto && cartaAlLado){
-                                carta.ponerCarta(function(err, result) {
-                                    if(err) {
-                                        console.error("Error en poner carta al casila: " + err.message);
-                                    } else {
-                                        res.clearCookie("cartaSeleccionada");
-                                        carta.readCartasMano(function(err, cartasEnMano) {
-                                            if(err) {
-                                                console.error("Error en leer carta en mano despues de poner carta a la tabla: " + err.message);
-                                            } else {
-                                                carta.repartirCarta(1, cartasEnMano, function(err, result) {
-                                                    if(err) {
-                                                        console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
-                                                    } else {
-                                                        var partida = new ModeloPartida("undefined");
-                                                        partida.readActivas(req.params.nombre, req.session.jugador.Nick, function(err, rowPartida) {
-                                                            if(err) {
-                                                                console.error("Error en leer partida despues de repartir nueva carta: " + err.message);
-                                                            } else if(rowPartida.length === 0) {
-                                                                console.error("No encuentra la partida");
-                                                            } else {
-                                                                var encontrado = false;
-                                                                var fila = parseInt(carta.Fila), col = parseInt(carta.Columna);
-                                                                if(rowPartida[0].PosOro === 1) {
-                                                                    if((fila === 0 && col === 6) || (fila === 1 && col === 5) || (fila === 2 && col === 6)){
+
+                            if (index === array.length - 1) {
+                                if(correcto && cartaAlLado){
+                                    carta.ponerCarta(function(err, result) {
+                                        if(err) {
+                                            console.error("Error en poner carta al casila: " + err.message);
+                                        } else {
+                                            res.clearCookie("cartaSeleccionada");
+                                            carta.readCartasMano(function(err, cartasEnMano) {
+                                                if(err) {
+                                                    console.error("Error en leer carta en mano despues de poner carta a la tabla: " + err.message);
+                                                } else {
+                                                    carta.repartirCarta(1, cartasEnMano, function(err, result) {
+                                                        if(err) {
+                                                            console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
+                                                        } else {
+                                                            var partida = new ModeloPartida("undefined");
+                                                            partida.readActivas(req.params.nombre, req.session.jugador.Nick, function(err, rowPartida) {
+                                                                if(err) {
+                                                                    console.error("Error en leer partida despues de repartir nueva carta: " + err.message);
+                                                                } else if(rowPartida.length === 0) {
+                                                                    console.error("No encuentra la partida");
+                                                                } else {
+                                                                    var encontrado = false;
+                                                                    var fila = parseInt(carta.Fila), col = parseInt(carta.Columna);
+                                                                    if(rowPartida[0].PosOro === 1) {
+                                                                        if((fila === 0 && col === 6) || (fila === 1 && col === 5) || (fila === 2 && col === 6)){
+                                                                                encontrado = true;
+                                                                        }
+                                                                    } else if(rowPartida[0].PosOro === 3) {
+                                                                        if((fila === 2 && col === 6) || (fila === 3 && col === 5) || (fila === 4 && col === 6)){
                                                                             encontrado = true;
+                                                                        }                                                                    
+                                                                    } else {
+                                                                        if((fila === 4 && col === 6) || (fila === 5 && col === 5) || (fila === 6 && col === 6)){
+                                                                            encontrado = true;
+                                                                        }                                                                    
                                                                     }
-                                                                } else if(rowPartida[0].PosOro === 3) {
-                                                                    if((fila === 2 && col === 6) || (fila === 3 && col === 5) || (fila === 4 && col === 6)){
-                                                                        encontrado = true;
-                                                                    }                                                                    
-                                                                } else {
-                                                                    if((fila === 4 && col === 6) || (fila === 5 && col === 5) || (fila === 6 && col === 6)){
-                                                                        encontrado = true;
-                                                                    }                                                                    
+                                                                    var participantes = rowPartida[0].Participantes.split(',');
+                                                                    var newPartida = new ModeloPartida(rowPartida[0]);
+                                                                    if(participantes.indexOf(rowPartida[0].Turno) === participantes.length - 1){
+                                                                        // ultimo
+                                                                        newPartida.Turno = participantes[0];
+                                                                    } else {
+                                                                        newPartida.Turno = participantes[participantes.indexOf(rowPartida[0].Turno) + 1];
+                                                                    }
+                                                                    newPartida.Max_turno = rowPartida[0].Max_turno - 1;
+                                                                    if(encontrado) {
+                                                                        newPartida.Estado = 'Terminada';
+                                                                        newPartida.terminarPartida(req.session.jugador.Nick, function(err, result) {
+                                                                            if(err) {
+                                                                                console.error("Error en actualizar partida despues de poner carta: " + err.message);
+                                                                            } else if(result.length === 0) {
+                                                                                console.error("No ha actualizado la partida");
+                                                                            } else {
+                                                                                console.log("ha ganado el equipo de " + req.session.jugador.Nick);
+                                                                                res.redirect('/jugador/' + req.session.jugador.Nick);
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        newPartida.Estado = 'Activa';
+                                                                        newPartida.update(function(err, result) {
+                                                                            if(err) {
+                                                                                console.error("Error en actualizar partida despues de poner carta: " + err.message);
+                                                                            } else if(result.length === 0) {
+                                                                                console.error("No ha actualizado la partida");
+                                                                            } else {
+                                                                                res.redirect('/partida/' + req.params.nombre);
+                                                                            }
+                                                                        });
+                                                                    }
                                                                 }
-                                                                var participantes = rowPartida[0].Participantes.split(',');
-                                                                var newPartida = new ModeloPartida(rowPartida[0]);
-                                                                if(participantes.indexOf(rowPartida[0].Turno) === participantes.length - 1){
-                                                                    // ultimo
-                                                                    newPartida.Turno = participantes[0];
-                                                                } else {
-                                                                    newPartida.Turno = participantes[participantes.indexOf(rowPartida[0].Turno) + 1];
-                                                                }
-                                                                newPartida.Max_turno = rowPartida[0].Max_turno - 1;
-                                                                if(encontrado) {
-                                                                    newPartida.Estado = 'Terminada';
-                                                                    newPartida.terminarPartida(req.session.jugador.Nick, function(err, result) {
-                                                                        if(err) {
-                                                                            console.error("Error en actualizar partida despues de poner carta: " + err.message);
-                                                                        } else if(result.length === 0) {
-                                                                            console.error("No ha actualizado la partida");
-                                                                        } else {
-                                                                            console.log("ha ganado el equipo de " + req.session.jugador.Nick);
-                                                                            res.redirect('/jugador/' + req.session.jugador.Nick);
-                                                                        }
-                                                                    });
-                                                                } else {
-                                                                    newPartida.Estado = 'Activa';
-                                                                    newPartida.update(function(err, result) {
-                                                                        if(err) {
-                                                                            console.error("Error en actualizar partida despues de poner carta: " + err.message);
-                                                                        } else if(result.length === 0) {
-                                                                            console.error("No ha actualizado la partida");
-                                                                        } else {
-                                                                            res.redirect('/partida/' + req.params.nombre);
-                                                                        }
-                                                                    });
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                });
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else if (!cartaAlLado) {
+                                    res.cookie("error", "No existe ruta para llegar este posicion");
+                                    res.redirect('/partida/' + req.params.nombre);
+                                }else {
+                                    res.redirect('/partida/' + req.params.nombre);
+                                }
+                            }
+                        });
+                    } else {
+                        carta.ponerCarta(function(err, result) {
+                            if(err) {
+                                console.error("Error en poner carta al casila: " + err.message);
+                            } else {
+                                res.clearCookie("cartaSeleccionada");
+                                carta.readCartasMano(function(err, cartasEnMano) {
+                                    if(err) {
+                                        console.error("Error en leer carta en mano despues de poner carta a la tabla: " + err.message);
+                                    } else {
+                                        carta.repartirCarta(1, cartasEnMano, function(err, result) {
+                                            if(err) {
+                                                console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
+                                            } else {
+                                                res.redirect('/partida/' + req.params.nombre);
                                             }
                                         });
                                     }
                                 });
-                            } else if (!cartaAlLado) {
-                                res.cookie("error", "No existe ruta para llegar este posicion");
-                                res.redirect('/partida/' + req.params.nombre);
-                            }else {
-                                res.redirect('/partida/' + req.params.nombre);
                             }
-                        }
-                    });
-                } else {
-                    carta.ponerCarta(function(err, result) {
-                        if(err) {
-                            console.error("Error en poner carta al casila: " + err.message);
-                        } else {
-                            res.clearCookie("cartaSeleccionada");
-                            carta.readCartasMano(function(err, cartasEnMano) {
-                                if(err) {
-                                    console.error("Error en leer carta en mano despues de poner carta a la tabla: " + err.message);
-                                } else {
-                                    carta.repartirCarta(1, cartasEnMano, function(err, result) {
-                                        if(err) {
-                                            console.error("Error en repartir carta despues de poner carta a la tabla: " + err.message);
-                                        } else {
-                                            res.redirect('/partida/' + req.params.nombre);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     } else {
         res.redirect('/partida/' + req.params.nombre);
     }
+});
+
+router.post('/:partida/comentar', function(req, res) {
+    var comentario = new ModeloComentario({Jugador: req.session.jugador.Nick, Comentario: req.body.Comentario, Partida: req.params.partida, Foto: req.session.jugador.Foto });
+    comentario.comentar(function(err, result) {
+        if(err) {
+            console.error("Error al comentar");
+            res.cookie("error", "Error al comentar: " + err.message);
+            res.redirect('/partida/' + req.params.partida);
+        } else {
+            res.redirect('/partida/' + req.params.partida);
+        }
+    });
 });
 
 module.exports = router;

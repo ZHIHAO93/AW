@@ -32,13 +32,25 @@
                                                     <% } else { %>
                                                         <td><img src="../images/noGold.png"></img></td>
                                                     <% } %>
+                                                <% } else if(cartasTabla[i].Visible === 1) {%>
+                                                    <% if (partida.PosOro === fila) {%>
+                                                        <td><img src="../images/Gold.png"></img></td>
+                                                    <% } else { %>
+                                                        <td><img src="../images/noGold.png"></img></td>
+                                                    <% } %>
+                                                <% } else if(herra === "Lupa") {%>
+                                                    <td><a href="/partida/<%= partida.Nombre %>/casilla/<%= fila %>y<%= columna %> "><img src="../images/DNK.png"></img></a></td>
                                                 <% } else {%>
                                                     <td><img src="../images/DNK.png"></img></td>
                                                 <% } %>
+                                            <% } else if(herra && herra === "Bomba"){ %>
+                                                <td><a href="/partida/<%= partida.Nombre %>/casilla/<%= fila %>y<%= columna %> "><img src="../images/<%= cartasTabla[i].Path %>.png" title = "<%= cartasTabla[i].Propietario %>"></img></td>
                                             <% } else { %>
                                                 <td><img src="../images/<%= cartasTabla[i].Path %>.png" title = "<%= cartasTabla[i].Propietario %>"></img></td>
                                             <% } %>
                                             <% i++; %>
+                                       <% } else if(herra === "Bomba") { %>
+                                               <td><img src="../images/cardImg2.jpg"></img></td>
                                        <% } else { %>
                                                <td><a href="/partida/<%= partida.Nombre %>/casilla/<%= fila %>y<%= columna %> "><img src="../images/cardImg2.jpg"></img></a></td>
                                          <% } %>
@@ -56,8 +68,10 @@
                                         <% if(jugador.Nick === partida.Turno) { %>
                                             <% if(cartas[i].Path[0] === 'T' && roleHerra.Herramienta === "SI") { %>
                                                 <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/<%= cartas[i].Path %>.png"></img></a></td>
-                                            <% } else if(cartas[i].Path[0] !== 'T'){ %>
+                                            <% } else if(cartas[i].Path === 'PicoArreglado' || cartas[i].Path === 'PicoRoto' ){ %>
                                                 <td><a href="/partida/<%= partida.Nombre %>/herramienta/<%= cartas[i].Path %>"><img src="../images/<%= cartas[i].Path %>.png"></img></a></td>
+                                            <% } else if(cartas[i].Path === 'Lupa' || cartas[i].Path === 'Bomba') { %>
+                                                <td><a href="/partida/<%= partida.Nombre %>/<%= cartas[i].Path %>"><img src="../images/<%= cartas[i].Path %>.png"></img></a></td>
                                             <% } else {%>
                                                 <td><img src="../images/<%= cartas[i].Path %>.png"></img></td>
                                             <% } %>
@@ -73,7 +87,7 @@
                                     <table>
                                         <tr>
                                             <% for(var i=0; i < nCarta; i++){ %>
-                                                <td><a href="/partida/<%= partida.Nombre %>/cambiar/<%= cartas[i].Path %>"><input type="button" value="cambiar"></a></td>
+                                                <td><a href="/partida/<%= partida.Nombre %>/cambiar/<%= cartas[i].Path %>"><input class="boton" type="button" value="cambiar"></a></td>
                                             <% } %>
                                         </tr>
                                     </table>
@@ -85,7 +99,32 @@
                                 </div>
                             <% } %>
                         <% } %>
-		</div>
-		</div>
+                <h1>&#124Comentarios</h1>
+                    <div class = "comentario">
+                    <% if(comentarios.length > 0) { %>
+                    <% comentarios.forEach(function(obj) {%>
+                        <div class = "Realizados">
+                                <p>
+                                    <img class="Perfil" src="../images/<%= obj.Foto %>"></img><br>
+                                    <%= obj.Jugador %><br><br>
+                                    <%= obj.Fecha %> <br><br>
+                                    <%= obj.Comentario %>
+                                </p>
+                        </div>
+                    <% }) %>
+                    <% } %>
+                    <form action="/<%= partida.Nombre%>/comentar" method="post" class = "Nuevo">
+                    Introduce aquí tu comentario:
+                    <br>
+                            <div class = "Formulario">
+                                <textarea name="Comentario"></textarea>
+                                <div class="Boton">
+                                        <input class="boton" type="submit" value="Enviar"></input>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                </div>
+                </div>
 	</div>
 <%- include footer %>

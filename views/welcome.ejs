@@ -25,8 +25,8 @@
                                                                                 <td><%= parti.Nombre %></td>
                                                                                 <td><%= parti.Fecha %></td>
                                                                                 <td><%= participantes.length %>/<%= parti.Max_jugadores %></td>
-                                                                                <% if (parti.Creador === jugador.Nick && parti.Num_jugadores >= 3) {%>
-                                                                                        <td><a class="UnirCerrar" href="/cerrar/<%= parti.Nombre %>">Cerrar</a></td>
+                                                                                <% if (parti.Creador === jugador.Nick && participantes.length >= 3) {%>
+                                                                                        <td><a href="/cerrar/<%= parti.Nombre %>"><input class="boton" type="button" value="Cerrar"></a></td>
                                                                                 <% } %>
                                                                         </tr>
                                                                     <% } %>

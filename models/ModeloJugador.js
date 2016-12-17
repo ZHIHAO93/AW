@@ -17,6 +17,10 @@ function Jugador(jugador) {
 Jugador.prototype.create = function(callback) {
     var conexion = mysql.createConnection();
     var nuevoJugador = this;
+    console.log(nuevoJugador);
+    if(nuevoJugador.Foto === '') {
+        nuevoJugador.Foto = './perfil/anonimo.jpg';
+    }
     conexion.connect(function(err) {
        if(err) {
            callback(err, "undefined");

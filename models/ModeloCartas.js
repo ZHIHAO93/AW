@@ -13,6 +13,49 @@ function Carta(carta){
     this.Visible = 0;
 }
 
+Carta.prototype.Lupa = function(callback) {
+    var conexion = mysql.createConnection();
+    var carta = this;
+    console.log(this);
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "Update carta set Visible = 1 where Fila = " + carta.Fila + " and Columna = " + carta.Columna + " and Partida = '"
+                    + carta.Partida + "'",
+            function(err, result) {
+                if(err) {
+                    callback(err, null);
+                } else {
+                    callback(null, result);
+                }
+            });
+        }
+    });
+};
+
+Carta.prototype.Bombardear = function(callback) {
+    var conexion = mysql.createConnection();
+    var carta = this;
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "Delete from carta where Fila = " + carta.Fila + " and Columna = " + carta.Columna + " and Partida = '"
+                    + carta.Partida + "'",
+            function(err, result) {
+                if(err) {
+                    callback(err, "undefined");
+                } else {
+                    callback(null, result);
+                }
+            });
+        }
+    });
+};
+
 Carta.prototype.eliminarCarta = function(callback) {
     var conexion = mysql.createConnection();
     var carta = this;

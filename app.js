@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', { jugador: req.cookies.jugador, error: null, errorStatus: res.status, errorStack: res.locals.error.status});
 });
 
 var server = app.listen(app.get('port'), function() {
