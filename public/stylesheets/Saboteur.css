@@ -194,3 +194,15 @@ button {
     padding-bottom: 20px;
     overflow: hidden;
 }
+/* Nuevo introducido por Fer */
+/*Div donde se pone el boton*/
+.Boton{
+	margin-top: 20px;
+}
+/*Nueva estilo del botón*/
+.boton{
+	border-radius: 20px;
+	font-family: Arial;
+	color:black;
+	background: #ff9933;
+}
