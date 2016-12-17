@@ -186,13 +186,23 @@ button {
 }
 
 .Error {
-    position: relative;
+	/*Nuevo*/
+	border: 2px solid #ff0000;
+	background-color:#ffcc66;
+	color:#ff0000;
+	text-align: center;
+	font-weight: bold;
+	margin-top: 20px;
+	margin-left: 100px;
+	margin-right: 100px;
+	
+    /*position: relative;
     background-color: #ff8566;
     margin-left: 20px;
     margin-right: 20px;
     margin-top: 20px;
     padding-bottom: 20px;
-    overflow: hidden;
+    overflow: hidden;*/
 }
 /* Nuevo introducido por Fer */
 /*Div donde se pone el boton*/
