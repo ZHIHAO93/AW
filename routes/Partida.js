@@ -142,9 +142,7 @@ router.get('/cerrar/:partida', function(req, res) {
                             } else {
                                 numSaboteador = Math.floor(Math.random() * jugadores.length);
                                 saboteadores.push(jugadores[numSaboteador].Jugador);
-                                while(saboteadores.indexOf(numSaboteador) === -1){
-                                    numSaboteador = Math.floor(Math.random() * jugadores.length);
-                                }
+                                numSaboteador = Math.floor(Math.random() * jugadores.length);
                                 saboteadores.push(jugadores[numSaboteador].Jugador);
                             }
                             participa.asignarRole(saboteadores, function(err, result) {
