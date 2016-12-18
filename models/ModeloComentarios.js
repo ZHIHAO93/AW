@@ -11,6 +11,11 @@ function Comentario(comentario) {
     this.Foto = comentario.Foto;
 }
 
+/**
+ * Leer todos los comentarios de la partida
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Comentario.prototype.ReadAll = function(callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
@@ -19,7 +24,9 @@ Comentario.prototype.ReadAll = function(callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                "Select * from comenta where partida = ?",
+                "SELECT * " + 
+                "FROM comenta " +
+                "WHERE partida = ?",
                 partida,
                 function(err, rowComentarios) {
                     if(err) {
@@ -32,6 +39,11 @@ Comentario.prototype.ReadAll = function(callback) {
     });
 };
 
+/**
+ * Comentar una partida
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Comentario.prototype.comentar = function(callback) {
     var conexion = mysql.createConnection();
     var nuevoComentario = this;
@@ -40,15 +52,15 @@ Comentario.prototype.comentar = function(callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "Insert into comenta set ?",
-            nuevoComentario,
-            function(err, result) {
-                if(err) {
-                    callback(err, "undefined");
-                } else {
-                    callback(null, result);
-                }
-            });
+                    "INSERT INTO comenta SET ?",
+                    nuevoComentario,
+                    function(err, result) {
+                        if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            callback(null, result);
+                        }
+                    });
         }
     });
 };

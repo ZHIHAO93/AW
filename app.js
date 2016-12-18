@@ -22,9 +22,9 @@ var middlewareSession = session({
 });
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 var jugador = require('./routes/Jugador');
 var partida = require('./routes/Partida');
+var config = require('./config');
 
 var app = express();
 
@@ -43,7 +43,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(middlewareSession);
 
 app.use('/', index);
-app.use('/users', users);
 app.use('/jugador', jugador);
 app.use('/', partida);
 
@@ -67,8 +66,8 @@ app.use(function(err, req, res, next) {
   res.render('error', { jugador: req.cookies.jugador, error: null, errorStatus: res.status, errorStack: res.locals.error.status});
 });
 
-var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
+app.listen(config.port, function() {
+  console.log('Express server listening on port ' + config.port);
 });
 
 module.exports = app;

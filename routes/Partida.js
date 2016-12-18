@@ -70,6 +70,7 @@ router.get('/unir/:partida', function(req, res) {
     participa.unir(function(err, rowParticipa) {
         if(err) {
             console.error("Error en unir partida" + err.message);
+            res.cookie("error", "Error en unir partida" + err.message);
             res.redirect('/unirPartida');
         } else {
             console.log("El jugador " + participacion.Jugador + " ha unido a la partida " + participacion.Partida);
@@ -77,6 +78,7 @@ router.get('/unir/:partida', function(req, res) {
             partida.read(function(err, rowPartida) {
                 if(err) {
                     console.error("Error en leer partida" + err.message);
+                    res.cookie("error", "Error en leer partida" + err.message);
                     res.redirect('/unirPartida');
                 } else {
                     participa.participantes(function(err, jugadores) {
@@ -100,23 +102,21 @@ router.get('/unir/:partida', function(req, res) {
 });
 
 router.get('/cerrar/:partida', function(req, res) {
-    var p = new ModeloPartida("undefined");
-    p.Nombre = req.params.partida;
+    var p = new ModeloPartida({ Nombre: req.params.partida });
     p.read(function(err, result) {
         if(err) {
-            console.error("Erro en comprobacion de partida cuando cierra la partida");
-            console.error(err.message);
+            console.error("Erro en comprobacion de partida cuando cierra la partida: " + err.message);
+            res.cookie("error", "Erro en comprobacion de partida cuando cierra la partida: " + err.message);
             res.redirect('/jugador/' + req.session.jugador.Nick);
         } else {
             var partida = new ModeloPartida(result[0]);
-            var participa = new ModeloParticipacion("undefined");
-            participa.Partida = p.Nombre;
-            partida.Max_turno = result[0].Max_turno;
+            var participa = new ModeloParticipacion({ Partida: p.Nombre, Max_turno: result[0].Max_turno });
             
             participa.participantes(function(err, jugadores) {
                 if(err) {
                     console.error("Error cuando cierra la partida: " + err.message);
-                    //res.redirect('/jugador/' + req.session.jugador.Nick);
+                    res.cookie("error", "Erro cuando cierra la partida: " + err.message);
+                    res.redirect('/jugador/' + req.session.jugador.Nick);
                 } else {
                     var numJugador = Math.floor(Math.random() * jugadores.length);
                     partida.Estado = "Activa";
@@ -124,30 +124,37 @@ router.get('/cerrar/:partida', function(req, res) {
                     var oros = [1, 3, 5];
                     partida.PosOro = 0;
                     while(oros.indexOf(partida.PosOro) === -1){
+                        // generamos un numero aleatorio entre [1, 3, 5]
                         partida.PosOro = Math.floor(Math.random() * 5);
                     }
                     partida.update(function(err, result) {
                         if(err) {
-                            console.error("Error en cerrar el partido" + err.message);
+                            console.error("Error en cerrar la partida" + err.message);
+                            res.cookie("error", "Erro en cerrar la partida: " + err.message);
                             res.redirect('/jugador/' + req.session.jugador.Nick);
                         } else {
                             var saboteadores = [];
                             var numSaboteador;
+                            // asignamos los saboteadores segun numero de maxjugadores
                             if(partida.Max_jugadores === 3 || partida.Max_jugadores === 4){
                                 numSaboteador = Math.floor(Math.random() * jugadores.length);
                                 saboteadores.push(jugadores[numSaboteador].Jugador);
                             } else {
                                 numSaboteador = Math.floor(Math.random() * jugadores.length);
                                 saboteadores.push(jugadores[numSaboteador].Jugador);
-                                numSaboteador = Math.floor(Math.random() * jugadores.length);
+                                while(saboteadores.indexOf(numSaboteador) === -1){
+                                    numSaboteador = Math.floor(Math.random() * jugadores.length);
+                                }
                                 saboteadores.push(jugadores[numSaboteador].Jugador);
                             }
                             participa.asignarRole(saboteadores, function(err, result) {
                                 if(err) {
-                                    console.error("Error en asignar role " + err.message);
+                                    console.error("Error en asignar role: " + err.message);
+                                    res.cookie("error", "Erro en asignar role: " + err.message);
+                                    res.redirect('/jugador/' + req.session.jugador.Nick);
                                 } else {
                                     console.log("Asignado todos los roles");
-                                    var carta = new ModeloCarta({Partida: req.params.partida});
+                                    var carta = new ModeloCarta({ Partida: req.params.partida });
                                     carta.ponerCartasIniciales(function(err, result) {
                                         if(err) {
                                             console.error("Error en poner cartas iniciales: " + err.message);
@@ -182,24 +189,32 @@ router.get('/partida/:nombre', function(req, res) {
             } else {
                 nCarta = 5;
             }
-            var carta = new ModeloCarta({Propietario: req.session.jugador.Nick, Partida: req.params.nombre});
+            var carta = new ModeloCarta({ Propietario: req.session.jugador.Nick, Partida: req.params.nombre });
             carta.readTabla(function(err, cartaTabla) {
                 if(err) {
                     console.error("Error en leer las cartas de la tabla: " + err.message);
+                    res.cookie("error","Error en leer las cartas de la tabla: " + err.message);
+                    res.redirect('/jugador/' + req.session.jugador.Nick);
                 } else {
                     var comentario = new ModeloComentario({ Jugador: req.session.jugador.Nick, Comentario: req.body.Comentario, Partida: req.params.nombre });
                     comentario.ReadAll(function(err, rowComentarios) {
                         if(err) {
                             console.error("Error en leer los comentarios: " + err.message);
+                            res.cookie("error","Error en leer los comentarios: " + err.message);
+                            res.redirect('/jugador/' + req.session.jugador.Nick);
                         } else {
                             carta.readCartasMano(function(err, rowCartas) {
                                 if(err) {
                                     console.error("Error en consulta cartas en la mano: " + err.message);
+                                    res.cookie("error","Error en consulta cartas en la mano: " + err.message);
+                                    res.redirect('/jugador/' + req.session.jugador.Nick);
                                 } else {
                                     if(rowCartas.length === 0){
                                         carta.repartirCarta(nCarta, [], function(err, newCartas) {
                                             if(err){
                                                 console.error("Error en repartir cartas: " + err.message);
+                                                res.cookie("error","Error en repartir cartas: " + err.message);
+                                                res.redirect('/jugador/' + req.session.jugador.Nick);
                                             } else {
                                                 if(req.cookies.error){
                                                     var error = [req.cookies.error];
@@ -245,7 +260,9 @@ router.get('/partida/:nombre/herramienta/:pico', function(req, res) {
     }
     part.herramientas(estadoHer, function(err, result) {
         if(err) {
-            console.error("Error en herramientas");
+            console.error("Error en consultar las herramientas de jugadores");
+            res.cookie("error", 'Error en consultar las herramientas de jugadores');
+            res.redirect('/partida/' + req.params.nombre);
         } else {
             res.render('Jugadores', { jugador: req.session.jugador, partida: req.params.nombre, estados: result, pico: req.params.pico, error: null });
         }
@@ -271,7 +288,6 @@ router.get('/partida/:nombre/usarHerPico/:pico/:jugador', function(req, res) {
 });
 
 router.get('/partida/:nombre/cambiar/:carta', function(req, res) {
-    console.log("cambiar la carta " + req.params.carta);
     var carta = new ModeloCarta({ Propietario: req.session.jugador.Nick, Partida: req.params.nombre, Path: req.params.carta });
     carta.eliminarCarta(function(err, result) {
         if(err) {

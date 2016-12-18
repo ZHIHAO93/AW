@@ -2,6 +2,11 @@
 
 var mysql = require('./db');
 
+/**
+ * Constructora de participacion
+ * @param {type} participacion
+ * @returns {nm$_ModeloParticipa.Participacion}
+ */
 function Participacion(participacion) {
     this.Jugador = participacion.Jugador,
     this.Role = participacion.Role,
@@ -9,6 +14,11 @@ function Participacion(participacion) {
     this.Herramienta = "SI";
 }
 
+/**
+ * Unir un jugador a una partida
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.unir = function(callback) {
     var conexion = mysql.createConnection();
     var nuevaParticipacion = this;
@@ -17,7 +27,7 @@ Participacion.prototype.unir = function(callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "Insert into participa set ?",
+                    "INSERT INTO participa SET ?",
                     nuevaParticipacion,
                     function(err, rowParticipacion) {
                         if(err) {
@@ -32,6 +42,13 @@ Participacion.prototype.unir = function(callback) {
     });
 };
 
+/**
+ * Modificamos el estado de la herramienta del jugador
+ * @param {type} nuevoEstado el nuevo estado(SI, NO)
+ * @param {type} jugador el jugador 
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.updateHerra = function(nuevoEstado, jugador, callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
@@ -40,7 +57,9 @@ Participacion.prototype.updateHerra = function(nuevoEstado, jugador, callback) {
             callback(err);
         } else {
             conexion.query(
-                    "update participa set Herramienta = ? where partida = ? and Jugador = ?",
+                    "UPDATE participa " +
+                    "SET Herramienta = ? " +
+                    "WHERE partida = ? AND Jugador = ?",
                     [nuevoEstado, partida, jugador],
                     function(err, result) {
                         if(err) {
@@ -55,6 +74,12 @@ Participacion.prototype.updateHerra = function(nuevoEstado, jugador, callback) {
     });
 };
 
+/**
+ * Leer los jugadores segun el estado de la herramienta en una partida
+ * @param {type} estadoHer estado de la herramienta(SI, NO)
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.herramientas = function(estadoHer, callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
@@ -63,7 +88,9 @@ Participacion.prototype.herramientas = function(estadoHer, callback) {
             callback(err);
         } else {
             conexion.query(
-                    "Select * from participa where partida = ? and Herramienta = ?",
+                    "SELECT * " +
+                    "FROM participa " +
+                    "WHERE partida = ? AND Herramienta = ?",
                     [partida, estadoHer],
                     function(err, result) {
                         if(err) {
@@ -78,17 +105,24 @@ Participacion.prototype.herramientas = function(estadoHer, callback) {
     });
 };
 
+/**
+ * Leer los roles y herramientas de todos los jugadores en una partida
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.roleYHerramienta = function(callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
     var jugador = this.Jugador;
-    console.log(partida + " " + jugador);
+
     conexion.connect(function(err) {
         if(err) {
             callback(err);
         } else {
             conexion.query(
-                    "Select Role, Herramienta from participa where partida = ? and Jugador = ?",
+                    "SELECT Role, Herramienta " +
+                    "FROM participa " +
+                    "WHERE partida = ? AND Jugador = ?",
                     [partida, jugador],
                     function(err, result) {
                         if(err) {
@@ -103,15 +137,21 @@ Participacion.prototype.roleYHerramienta = function(callback) {
     });
 };
 
+/**
+ * Leer los participantes en una partida
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.participantes = function(callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
+    
     conexion.connect(function(err) {
         if(err) {
             callback(err);
         } else {
             conexion.query(
-                    "Select Jugador from participa where partida = ?",
+                    "SELECT Jugador FROM participa WHERE partida = ?",
                     partida,
                     function(err, result) {
                         if(err) {
@@ -126,6 +166,12 @@ Participacion.prototype.participantes = function(callback) {
     });
 };
 
+/**
+ * Asignar los roles de los jugadores al inicio del juego
+ * @param {type} saboteadores array de los saboteadores
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Participacion.prototype.asignarRole = function(saboteadores, callback) {
     var conexion = mysql.createConnection();
     var partida = this.Partida;
@@ -133,6 +179,7 @@ Participacion.prototype.asignarRole = function(saboteadores, callback) {
         if(err) {
             callback(err);
         } else {
+            // primero asignamos todos los jugadores como buscador
             conexion.query(
                     "Update Participa set Role = 'Buscador' where partida = ?",
                     partida,
@@ -140,13 +187,16 @@ Participacion.prototype.asignarRole = function(saboteadores, callback) {
                         if(err) {
                             callback(err, "undefined");
                         } else {
+                            // despues asinamos los saboteadores
                             var query = "";
                             var valores = [];
+                            
+                            // segun numero del jugador asignamos 1 saboteador o 2
                             if(saboteadores.length === 1){
-                                query = "Update Participa set Role = 'Saboteador' where partida = ? and jugador = ?";
+                                query = "UPDATE Participa SET Role = 'Saboteador' WHERE partida = ? AND jugador = ?";
                                 valores = [partida, saboteadores[0]];
                             } else {
-                                query = "Update Participa set Role = 'Saboteador' where partida = ? and (jugador = ? or jugador = ?)";
+                                query = "UPDATE Participa SET Role = 'Saboteador' WHERE partida = ? AND (jugador = ? or jugador = ?)";
                                 valores = [partida, saboteadores[0], saboteadores[1]];
                             }
                             conexion.query(query,

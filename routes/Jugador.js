@@ -5,6 +5,7 @@ var ModeloJugador = require('../models/ModeloJugador');
 var ModeloPartida = require('../models/ModeloPartida');
 
 var multer = require('multer');
+// ruta del imagen subida y su nombre
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, './public/images/perfil');
@@ -56,6 +57,7 @@ router.post('/login', function(req, res) {
                 res.cookie("error", 'No existe el jugador con Nick: ' + req.body.Nick);
                 res.redirect('/');
             } else {
+                //comprobamos password
                 if(!jugador.checkPassword(listJugador[0].Password)){
                     console.log("Contraseña incorrecta!");
                     res.cookie("error", 'Contraseña incorrecta!');
@@ -83,15 +85,17 @@ router.post('/reg', upload.single('Foto'), function(req, res) {
         } else {
             if(listJugador.length > 0) {
                 console.log("Ya existe jugador con Nick: " + jugador.Nick);
+                res.cookie("error", 'Ya existe el jugador con Nick: ' + jugador.Nick);
                 res.redirect('/');
             } else {
                 console.log("No existe jugador con Nick: " + jugador.Nick + ", Registrar!");
                 jugador.create(function(err, newRow) {
                     if(err) {
                         console.error(err.message);
+                        res.cookie("error", 'Error al crear nuevo jugador: ' + err.message);
+                        res.redirect('/');
                     } else {
                         console.log("El registro correcto!");
-                        console.log(newRow);
                         req.session.jugador = jugador;
                         res.redirect('/jugador/' + jugador.Nick);
                     }

@@ -3,7 +3,11 @@
 var mysql = require('./db');
 var passwordHash = require('password-hash');
 
-// Constructor
+/**
+ * Constructura del jugador
+ * @param {type} jugador
+ * @returns {nm$_ModeloJugador.Jugador}
+ */
 function Jugador(jugador) {
     this.Nick = jugador.Nick;
     this.Password = jugador.Password;
@@ -13,11 +17,16 @@ function Jugador(jugador) {
     this.Fecha_nacimiento = jugador.Fecha_nacimiento;
 };
 
-// Crear el nuevo jugador
+/**
+ * Crear un nuevo jugador
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Jugador.prototype.create = function(callback) {
     var conexion = mysql.createConnection();
     var nuevoJugador = this;
-    console.log(nuevoJugador);
+
+    // si no ha subido foto, usamos el foto anonimo
     if(nuevoJugador.Foto === '') {
         nuevoJugador.Foto = './perfil/anonimo.jpg';
     }
@@ -25,9 +34,10 @@ Jugador.prototype.create = function(callback) {
        if(err) {
            callback(err, "undefined");
        }  else {
+           //encriptamos la contraseña
            nuevoJugador.Password = passwordHash.generate(nuevoJugador.Password);
            conexion.query(
-                   "Insert into jugador set ?",
+                   "INSERT INTO jugador SET ?",
                    nuevoJugador,
                    function(err, result) {
                        if(err) {
@@ -42,6 +52,11 @@ Jugador.prototype.create = function(callback) {
     });
 };
 
+/**
+ * Leer datos de un jugador por nick
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Jugador.prototype.read = function(callback) {
     var conexion = mysql.createConnection();
     var nick = this.Nick;
@@ -50,7 +65,7 @@ Jugador.prototype.read = function(callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "Select * from jugador where Nick=?",
+                    "SELECT * FROM jugador WHERE Nick=?",
                     nick,
                     function(err, result) {
                         if(err) {
@@ -65,6 +80,11 @@ Jugador.prototype.read = function(callback) {
     });
 };
 
+/**
+ * verificar la contraseña del jugador
+ * @param {type} pass la contraseña que queremos verificar
+ * @returns {Boolean}
+ */
 Jugador.prototype.checkPassword = function(pass) {
     if(passwordHash.verify(this.Password, pass)){
         return true;

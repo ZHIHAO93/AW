@@ -3,6 +3,11 @@
 var mysql = require('./db');
 var ModeloParticipacion = require('./ModeloParticipa');
 
+/**
+ * Constructora de partida
+ * @param {type} partida
+ * @returns {nm$_ModeloPartida.Partida}
+ */
 function Partida(partida) {
     this.Nombre = partida.Nombre;
     this.Creador = partida.Creador;
@@ -34,6 +39,12 @@ function Partida(partida) {
     this.PosOro = partida.PosOro;
 }
 
+/**
+ * Cambiar el estado de una partida al 'Terminada'
+ * @param {type} ganador el equipo ganador
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Partida.prototype.terminarPartida = function(ganador, callback) {
     var conexion = mysql.createConnection();
     var partida = this.Nombre;
@@ -41,14 +52,15 @@ Partida.prototype.terminarPartida = function(ganador, callback) {
         if (err) {
             callback(err, "undefined");
         } else {
-            var query = "update partida p, Participa pa set p.Ganador = pa.Role, p.Estado = 'Terminada' where p.Nombre = '"
-                    + partida + "' and p.Nombre = pa.Partida and pa.Jugador = '" + ganador + "'";
             conexion.query(
-                    query,
+                    "UPDATE partida p, Participa pa " +
+                    "SET p.Ganador = pa.Role, p.Estado = 'Terminada' " +
+                    "WHERE p.Nombre = '" + partida + "' AND p.Nombre = pa.Partida AND pa.Jugador = '" + ganador + "'",
                     function(err, result) {
                         if(err) {
                             callback(err, "undefined");
                         } else {
+                            conexion.end();
                             callback(null, result);
                         }
                     }
@@ -57,6 +69,11 @@ Partida.prototype.terminarPartida = function(ganador, callback) {
     });
 };
 
+/**
+ * Crear una partida
+ * @param {type} callback
+ * @returns {undefined}
+ */
 Partida.prototype.create = function(callback) {
   var conexion = mysql.createConnection();
   var nuevaPartida = this;
@@ -65,13 +82,15 @@ Partida.prototype.create = function(callback) {
           callback(err, "undefined");
       } else {
           conexion.query(
-                  "Insert into partida set ?",
+                  "INSERT INTO partida SET ?",
                   nuevaPartida,
                   function(err, result) {
                       if(err) {
                           callback(err, "undefined");
                       } else {
                           conexion.end();
+                          
+                          // despues de crear partida, unimos el creador al partida
                            var participacion = {
                                 Jugador: nuevaPartida.Creador,
                                 Role: "",
@@ -92,6 +111,11 @@ Partida.prototype.create = function(callback) {
   });
 };
 
+/**
+ * Modificar una partida con su nombre
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Partida.prototype.update = function(callback) {
     var conexion = mysql.createConnection();
     var nuevaPartida = this;
@@ -100,7 +124,7 @@ Partida.prototype.update = function(callback) {
            callback(err, "undefined");
        } else {
            conexion.query(
-                   "Update partida set ? where Nombre = ?",
+                   "UPDATE partida SET ? WHERE Nombre = ?",
                    [nuevaPartida, nuevaPartida.Nombre],
                    function(err, result) {
                        if(err) {
@@ -115,6 +139,11 @@ Partida.prototype.update = function(callback) {
     });
 };
 
+/**
+ * Leer una partida con su nombre
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Partida.prototype.read = function(callback) {
 	var conexion = mysql.createConnection();
         var partida = this.Nombre;
@@ -123,7 +152,7 @@ Partida.prototype.read = function(callback) {
                 callback(err, "undefined");
             } else {
                 conexion.query(
-                        "Select * from partida where Nombre = ?",
+                        "SELECT * FROM partida WHERE Nombre = ?",
                         partida,
                         function(err, result) {
                                 if(err) {
@@ -138,6 +167,12 @@ Partida.prototype.read = function(callback) {
 	});
 };
 
+/**
+ * Leer todas las partida
+ * @param {type} jugador nick del jugador
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Partida.prototype.readAll = function(jugador, callback) {
 	var conexion = mysql.createConnection();
         var p = this;
@@ -146,14 +181,25 @@ Partida.prototype.readAll = function(jugador, callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "SELECT partida.Nombre, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Estado, partida.Creador, partida.Turno, partida.Ganador, partida.Max_jugadores, count(participa.Jugador) as Num_jugadores, participa.Role \n\
-                                from partida, participa \n\
-                                where partida.Nombre = participa.Partida and participa.Jugador = '" + jugador + "' Group by partida.Nombre",
+                            "SELECT " +
+                                "partida.Nombre, " +
+                                "Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, " +
+                                "partida.Estado, " +
+                                "partida.Creador, " +
+                                "partida.Turno, " +
+                                "partida.Ganador, " +
+                                "partida.Max_jugadores, " +
+                                "count(participa.Jugador) as Num_jugadores, " +
+                                "participa.Role " +
+                            "FROM partida, participa " +
+                            "WHERE partida.Nombre = participa.Partida and participa.Jugador = '" + jugador + "' " +
+                            "Group by partida.Nombre",
                             function(err, result) {
                                     if(err) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
+                                        // y las que estan abiertas
                                         p.readAbiertas(function(err, resultAbiertas) {
                                             if(err) {
                                                 callback(err, "undefined");
@@ -168,6 +214,11 @@ Partida.prototype.readAll = function(jugador, callback) {
 	});
 };
 
+/**
+ * Leer las partidas que estan abiertas
+ * @param {type} callback
+ * @returns {undefined}
+ */
 Partida.prototype.readAbiertas = function(callback) {
 	var conexion = mysql.createConnection();
 	conexion.connect(function(err){
@@ -175,9 +226,15 @@ Partida.prototype.readAbiertas = function(callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "SELECT partida.Nombre, partida.Creador, Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, partida.Max_jugadores, GROUP_CONCAT(participa.Jugador) as Participantes \n\
-                                from partida, participa \n\
-                                where partida.Estado='Abierta' and partida.Nombre = participa.Partida Group by partida.Nombre",
+                            "SELECT " +
+                                "partida.Nombre, " +
+                                "partida.Creador, " +
+                                "Date_format(partida.Fecha, '%d-%m-%Y') as Fecha, " +
+                                "partida.Max_jugadores, " +
+                                "GROUP_CONCAT(participa.Jugador) as Participantes " +
+                            "FROM partida, participa " +
+                            "WHERE partida.Estado='Abierta' AND partida.Nombre = participa.Partida " +
+                            "Group by partida.Nombre",
                             function(err, result) {
                                     if(err) {
                                         callback(err, "undefined");
@@ -191,6 +248,13 @@ Partida.prototype.readAbiertas = function(callback) {
 	});
 };
 
+/**
+ * Leer una partida que esta activa
+ * @param {type} partida el nombre de la partida
+ * @param {type} jugador el nick del jugador
+ * @param {type} callback funcion de retorno
+ * @returns {undefined}
+ */
 Partida.prototype.readActivas = function(partida, jugador, callback) {
 	var conexion = mysql.createConnection();
 	conexion.connect(function(err){
@@ -198,17 +262,21 @@ Partida.prototype.readActivas = function(partida, jugador, callback) {
                     callback(err, "undefined");
 		} else {
                     conexion.query(
-                            "SELECT partida.*, GROUP_CONCAT(participa.Jugador) as Participantes, count(participa.Jugador) as numJugadores \n\
-                                from partida, participa \n\
-                                where partida.Nombre = ? and partida.Nombre = participa.Partida Group by partida.Nombre",
-                                partida,
+                            "SELECT " +
+                                "partida.*, " +
+                                "GROUP_CONCAT(participa.Jugador) as Participantes, " +
+                                "count(participa.Jugador) as numJugadores " +
+                            "FROM partida, participa " +
+                            "WHERE partida.Nombre = ? AND partida.Nombre = participa.Partida " +
+                            "Group by partida.Nombre",
+                            partida,
                             function(err, rowPartida) {
                                     if(err) {
                                         callback(err, "undefined");
                                     } else {
                                         conexion.end();
                                         var participa = new ModeloParticipacion({Jugador: jugador, Partida: partida});
-                                        console.log(participa);
+                                        // y leemos role del jugador y el estado de su herramienta
                                         participa.roleYHerramienta(function(err, roleHerra) {
                                             if(err) {
                                                 callback(err, "undefined");
