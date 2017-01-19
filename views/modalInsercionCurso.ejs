@@ -1,0 +1,76 @@
+<div>
+    <form class="form-horizontal" role="form" id="formNuevoCurso">
+        <div class="form-group">
+            <label for="titulo" class="col-lg-4 control-label">Título: </label>
+            <div class="col-lg-8">
+                <input type="text" class="form-control" id="titulo" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="descripcion" class="col-lg-4 control-label">Descripción: </label>
+            <div class="col-lg-8">
+                <textarea class="form-control" row="10" id="descripcion" required></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="localidad" class="col-lg-4 control-label">Localidad: </label>
+            <div class="col-lg-8">
+                <input type="text" class="form-control" id="localidad" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="direccion" class="col-lg-4 control-label">Dirección: </label>
+            <div class="col-lg-8">
+                <input type="text" class="form-control" id="direccion" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="imagen" class="col-lg-4 control-label">Imagen: </label>
+            <div class="col-lg-8">
+                <div class="input-group">
+                    <input id="mi-selector" type="text" class="form-control">
+                    <label class="input-group-btn">
+                        <span class="btn btn-primary">
+                            Seleccionar&hellip; <input id="selector-imagen" type="file" style="display: none;">
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="plazas" class="col-lg-4 control-label">Plazas(5-20): </label>
+            <div class="col-lg-8">
+                <input type="number" min="5" max="20" class="form-control" id="plazas" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fecha_ini" class="col-lg-4 control-label">Fecha de inicio: </label>
+            <div class="col-lg-8">
+                <input type="date" class="form-control" id="fecha_ini" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fecha_fin" class="col-lg-4 control-label">Fecha de finalización: </label>
+            <div class="col-lg-8">
+                <input type="date" class="form-control" id="fecha_fin" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="horarios_ini" class="col-lg-4 control-label">Horarios: </label>
+            <div class="col-lg-3">
+                <input type="time" class="form-control" id="horarios_ini" required>
+            </div>
+            <label class="col-lg-1 control-label">
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+            </label>
+            <div class="col-lg-3">
+                <input type="time" class="form-control" id="horarios_fin" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-2 col-lg-offset-5">
+                <button id="nuevoCurso" type="submit" class="btn btn-primary">Insertar</button>
+            </div>
+        </div>
+    </form>
+</div>
