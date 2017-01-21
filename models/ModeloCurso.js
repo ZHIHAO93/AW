@@ -107,4 +107,31 @@ Curso.prototype.read = function(id, callback) {
     });
 };
 
+Curso.prototype.busqueda = function(str, num, pos, callback) {
+    var conexion = mysql.createConnection();
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "SELECT titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
+                    "FROM cursos " +
+                    "WHERE titulo like '%" + str + "%' " +
+                    "ORDER BY fecha_ini " + 
+                    "LIMIT " + num + " OFFSET " + pos, 
+                    function(err, result) {
+                        if(err) {
+                            console.log(err);
+                            callback(err, "undefined");
+                        } else {
+                            console.log(result);
+                            conexion.end();
+                            callback(null, result);
+                        }
+                    }
+            );
+        }
+    });
+};
+
 module.exports = Curso;

@@ -8,10 +8,6 @@ router.get('/', function(req, res, next) {
   res.render('index.html');
 });
 
-router.get('/busqueda', function(req, res, next) {
-    res.render('busqueda', {});
-});
-
 // Insertar un nuevo usuario
 router.post('/nuevoUsuario', function(req, res, next) {
     var usuario = new daoUsuario(req.body);
@@ -127,6 +123,7 @@ router.get('/leerCurso', function(req, res, next) {
        curso.read(idCurso, function(err, result) {
            if(err) {
                 res.status(500);
+                res.end();
            } else {
                 if(result === 0){
                     res.status(404);
@@ -140,6 +137,32 @@ router.get('/leerCurso', function(req, res, next) {
        res.status(404);
        res.end();
    }
+});
+
+// busqueda de cursos
+router.get('/busqueda', function(req, res, next) {
+  var str = req.query.str;
+  var num = Number(req.query.num);
+  var pos = Number(req.query.pos);
+  var curso = new daoCurso("undefined");
+  if(str !== undefined && !isNaN(num) && !isNaN(pos)){
+    curso.busqueda(str, num, pos, function(err, result) {
+      if(err){
+        res.status(500);
+        res.end();
+      } else {
+        if(result.length === 0){
+          res.status(404);
+          res.end();
+        } else {
+          res.json(result);
+        }
+      }
+    });
+  } else {
+    res.status(404);
+    res.end();
+  }
 });
 
 router.post('/rendInfoCurso', function(req, res, next) {

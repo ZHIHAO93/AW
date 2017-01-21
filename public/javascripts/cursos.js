@@ -5,19 +5,15 @@ $(document).ready(function() {
 
 	$("#alerts").hide();
 
+	$("#tablaBusqueda").hide();
+
 	$("#paginacion").hide();
 
 	$("#logo").on("click", function(e) {
-		$('#busqueda').parent().attr("class", "active");
-		$('#contenido').load('/busqueda');
 		e.preventDefault();
 	});
 
-	$("#busqueda").on("click", function(e) {
-		$('#busqueda').parent().attr("class", "active");
-		$('#contenido').load('/busqueda');
-		e.preventDefault();
-	});
+	$("#buscar").on("submit", busqueda);
 
 	$("#identificarse").on("click", function() {
 		$('#logModal').modal();
@@ -36,11 +32,35 @@ $(document).ready(function() {
 
 });
 
-function inicio(e) {
-	$('#busqueda').parent().attr("class", "desactive");
-	$('#contenido').load('/');
+function busqueda(e) {
+	$("#tablaBusqueda").find("tbody").empty();
+	$.ajax({
+		type: "GET",
+		url: "/busqueda",
+		data: {
+			str: $("#buscarPalabra").val(),
+			num: 3,
+			pos: 2},
+		success: function(data, textStatus, jqXHR ) {
+			$("#tablaBusqueda").show();
+			data.forEach(function(curso) {
+				$("#tablaBusqueda").find("tbody").append(
+					$("<tr>")
+						.append($("<td>").text(curso.titulo))
+						.append($("<td>").text(curso.localidad))
+						.append($("<td>").text(curso.fecha_ini))
+						.append($("<td>").text(curso.fecha_fin)
+					)
+				);
+			});
+		},
+		error: function(jqXHR, textStatus, errorThrown ) {
+			$("#alerts").attr("alert-warning", "alert-danger");
+			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
+		}
+	});
 	e.preventDefault();
-};
+}
 
 function nuevaCuenta(e) {
 	$('h4.modal-title').html("Nuevo usuario");
