@@ -37,6 +37,30 @@ Curso.prototype.create = function(callback) {
     });
 };
 
+Curso.prototype.update = function(id, callback) {
+    var conexion = mysql.createConnection();
+    var nuevoCurso = this;
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "UPDATE cursos SET ? WHERE id = " + id,
+                    nuevoCurso,
+                    function(err, result) {
+                        if(err) {
+                            console.log(err);
+                            callback(err, "undefined");
+                        } else {
+                            conexion.end();
+                            callback(null, result.affectedRows);
+                        }
+                    }
+            );
+        }
+    });
+};
+
 Curso.prototype.delete = function(id, callback) {
     var conexion = mysql.createConnection();
     conexion.connect(function(err) {
