@@ -108,9 +108,9 @@ function printInfoCurso() {
 			$("#infoCurso").modal();
 			$("#infoCurso").find("h4.modal-title").html(data.titulo);
 			$("#infoCurso").find("div.modal-body")
-				.append($('<div>')
-					.append($('<p>').prop("class", "col-lg-8").text(data.descripcion))
-					.append('<img class="pull-right col-lg-4" src="/cursos/' + idCurso + '/imagen" />'))
+				.append($('<div>').prop("class", "row")
+					.append($('<p>').prop("class", "col-lg-9").text(data.descripcion))
+					.append('<img class="pull-right col-lg-3" src="/cursos/' + idCurso + '/imagen" />'))
 				.append($('<div>')
 					.append($('<p>').append($('<strong>').text('Lugar de impartición:')))
 					.append($('<p>').text(data.direccion)))
