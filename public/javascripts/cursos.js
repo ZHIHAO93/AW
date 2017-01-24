@@ -7,6 +7,8 @@ $(document).ready(function() {
 
 	$("#tablaBusqueda").hide();
 
+	$("#tablaBusqueda").on("click", "tbody > tr", printInfoCurso)
+
 	$("#paginacion").hide();
 
 	$("#logo").on("click", function(e) {
@@ -46,11 +48,10 @@ function busqueda(e) {
 			data.forEach(function(curso) {
 				$("#tablaBusqueda").find("tbody").append(
 					$("<tr>")
-						.append($("<td>").text(curso.titulo))
+						.append($("<td>").prop("id", curso.id).text(curso.titulo))
 						.append($("<td>").text(curso.localidad))
 						.append($("<td>").text(curso.fecha_ini))
-						.append($("<td>").text(curso.fecha_fin)
-					)
+						.append($("<td>").text(curso.fecha_fin))
 				);
 			});
 		},
@@ -96,5 +97,36 @@ function nuevoUsuario(e) {
 };
 
 function printInfoCurso() {
-
+	$("#infoCurso").find("div.modal-body").empty();
+	var idCurso = $($(this).find('td')[0]).attr('id');
+	$.ajax({
+		type: "GET",
+		url: "/leerCurso",
+		data: {
+			id: idCurso},
+		success: function(data, textStatus, jqXHR ) {
+			$("#infoCurso").modal();
+			$("#infoCurso").find("h4.modal-title").html(data.titulo);
+			$("#infoCurso").find("div.modal-body")
+				.append($('<div>')
+					.append($('<p>').prop("class", "col-lg-8").text(data.descripcion))
+					.append('<img class="pull-right col-lg-4" src="/cursos/' + idCurso + '/imagen" />'))
+				.append($('<div>')
+					.append($('<p>').append($('<strong>').text('Lugar de impartición:')))
+					.append($('<p>').text(data.direccion)))
+				.append($('<div>')
+					.append($('<p>').append($('<strong>').text('Ciudad:')))
+					.append($('<p>').text(data.localidad)))
+				.append($('<div>')
+					.append($('<p>').append($('<strong>').text('Horario:')))
+					.append($('<p>').text(data.horario)))
+				.append($('<div>')
+					.append($('<p>').append($('<strong>').text('Número de plazas:')))
+					.append($('<p>').text(data.plazas)))
+		},
+		error: function(jqXHR, textStatus, errorThrown ) {
+			$("#alerts").attr("alert-warning", "alert-danger");
+			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
+		}
+	});
 }

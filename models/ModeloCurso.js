@@ -25,10 +25,10 @@ Curso.prototype.create = function(callback) {
                     "INSERT INTO cursos SET ?",
                     nuevoCurso,
                     function(err, result) {
+                        conexion.end();
                         if(err) {
                             callback(err, "undefined");
                         } else {
-                            conexion.end();
                             callback(null, result.insertId);
                         }
                     }
@@ -49,11 +49,41 @@ Curso.prototype.update = function(id, callback) {
                     nuevoCurso,
                     function(err, result) {
                         if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            conexion.end();
+                            if(result.affectedRows === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result.affectedRows);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
+Curso.prototype.updateImg = function(id, imagen, callback) {
+    var conexion = mysql.createConnection();
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "UPDATE cursos SET imagen = ? WHERE id = " + id,
+                    [imagen],
+                    function(err, result) {
+                        if(err) {
                             console.log(err);
                             callback(err, "undefined");
                         } else {
                             conexion.end();
-                            callback(null, result.affectedRows);
+                            if(result.affectedRows === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result.affectedRows);
+                            }
                         }
                     }
             );
@@ -72,11 +102,15 @@ Curso.prototype.delete = function(id, callback) {
                     "FROM cursos " +
                     "WHERE id=" + id,
                     function(err, result) {
+                        conexion.end();
                         if(err) {
                             callback(err, "undefined");
                         } else {
-                            conexion.end();
-                            callback(null, result.affectedRows);
+                            if(result.affectedRows === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result.affectedRows);
+                            }
                         }
                     }
             );
@@ -95,11 +129,42 @@ Curso.prototype.read = function(id, callback) {
                     "FROM cursos " +
                     "WHERE id=" + id,
                     function(err, result) {
+                        conexion.end();
                         if(err) {
-                            callback(err, "undefined");
+                            callback(err, undefined);
                         } else {
-                            conexion.end();
-                            callback(null, result[0]);
+                            if(result.length === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result[0]);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
+Curso.prototype.readImg = function(id, callback) {
+    var conexion = mysql.createConnection();
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "SELECT imagen " +
+                    "FROM cursos " +
+                    "WHERE id=" + id,
+                    function(err, result) {
+                        conexion.end();
+                        if(err) {
+                            callback(err, undefined);
+                        } else {
+                            if(result.length === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result[0].imagen);
+                            }
                         }
                     }
             );
@@ -114,17 +179,15 @@ Curso.prototype.busqueda = function(str, num, pos, callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "SELECT titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
+                    "SELECT id, titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
                     "FROM cursos " +
                     "WHERE titulo like '%" + str + "%' " +
                     "ORDER BY fecha_ini " + 
                     "LIMIT " + num + " OFFSET " + pos, 
                     function(err, result) {
                         if(err) {
-                            console.log(err);
                             callback(err, "undefined");
                         } else {
-                            console.log(result);
                             conexion.end();
                             callback(null, result);
                         }

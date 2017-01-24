@@ -1,6 +1,8 @@
 var express = require('express');
 var daoUsuario = require('../models/ModeloUsuario');
 var daoCurso = require('../models/ModeloCurso');
+var multer = require('multer');
+var upload = multer({ storage: multer.memoryStorage() });
 var router = express.Router();
 
 /* GET home page. */
@@ -165,9 +167,51 @@ router.get('/busqueda', function(req, res, next) {
   }
 });
 
-router.post('/rendInfoCurso', function(req, res, next) {
-    console.log(req.body);
-    res.render('infoCurso', { curso: req.body } );
+router.put('/cursos/:id/imagen', upload.single("imagen"), function(req, res, next) {
+  var idCurso = Number(req.params.id);
+  if(!isNaN(idCurso) && req.file){
+
+    var curso = new daoCurso("undefined");
+    curso.updateImg(idCurso, req.file.buffer, function(err, affectedRows) {
+      if(err) {
+        res.status(500);
+        res.end();
+      } else {
+        if(affectedRows === 0){
+          res.status(404);
+      } else {
+        res.status(200);
+      }
+        res.end();
+      }
+    });
+  } else {
+    res.status(404);
+    res.end();
+  }
+
 });
+
+router.get('/cursos/:id/imagen', function(req, res, next) {
+  var idCurso = Number(req.params.id);
+  if(isNaN(idCurso)){
+    next(new Error("Id no es numerico!"));
+  } else {
+    var curso = new daoCurso("undefined");
+    curso.readImg(idCurso, function(err, imagen) {
+      if(err){
+        next(err);
+      } else {
+        if(imagen){
+          res.end(imagen);
+        } else {
+          res.status(404);
+          res.end("Not found");
+        }
+      }
+    });
+  }
+});
+
 
 module.exports = router;
