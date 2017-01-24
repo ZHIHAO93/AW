@@ -34,7 +34,32 @@ Usuario.prototype.create = function(callback) {
     });
 };
 
-Usuario.prototype.read = function(correo, callback) {
+Usuario.prototype.readByEmail = function(correo, callback) {
+    var conexion = mysql.createConnection();
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    "SELECT * FROM usuarios WHERE correo='" + correo + "'",
+                    function(err, result) {
+                        conexion.end();
+                        if(err) {
+                            callback(err, "undefined");
+                        } else {
+                            if(result.length === 0){
+                                callback(null, null);
+                            } else {
+                                callback(null, result.length);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
+Usuario.prototype.readById = function(id, callback) {
     
 };
 

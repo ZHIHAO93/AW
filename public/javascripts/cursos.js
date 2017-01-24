@@ -67,6 +67,7 @@ function nuevaCuenta(e) {
 	$('h4.modal-title').html("Nuevo usuario");
 	$('#ident').hide();
 	$('#nuevo').show();
+	$('#newCorreo').on("change", comprobarCorreo);
 	e.preventDefault();
 };
 
@@ -76,8 +77,8 @@ function nuevoUsuario(e) {
 		url: "/nuevoUsuario",
 		contentType: "application/json",
 		data: JSON.stringify({
-			correo: $("#correo").val(),
-			password: $("#password").val(),
+			correo: $("#newCorreo").val(),
+			password: $("#newPassword").val(),
 			nombre: $("#nombre").val(),
 			apellido: $("#apellido").val(),
 			sexo: $("#sexo").val(),
@@ -127,6 +128,34 @@ function printInfoCurso() {
 		error: function(jqXHR, textStatus, errorThrown ) {
 			$("#alerts").attr("alert-warning", "alert-danger");
 			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
+		}
+	});
+}
+
+function comprobarCorreo() {
+	var correo = $(this).val();
+	$.ajax({
+		type: "GET",
+		url: "/comprobarCorreo",
+		data: {
+			correo: correo},
+		success: function(data, textStatus, jqXHR ) {
+			$("#notNuevoCorreo").empty();
+			$("#notNuevoCorreo")
+				.append($('<span>')
+					.prop("class", "glyphicon glyphicon-ok")
+					.prop("style", "color: #33cc33")
+				.text(" Puedes utilizar este correo"));
+		},
+		error: function(jqXHR, textStatus, errorThrown ) {
+			$("#notNuevoCorreo").empty();
+			if(jqXHR.status === 401){
+				$("#notNuevoCorreo")
+				.append($('<span>')
+					.prop("class", "glyphicon glyphicon-remove")
+					.prop("style", "color: red")
+				.text(" Ya existe este correo"));
+			}
 		}
 	});
 }

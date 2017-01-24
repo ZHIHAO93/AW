@@ -11,6 +11,15 @@ router.get('/', function(req, res, next) {
 });
 
 // Insertar un nuevo usuario
+/*
+{ 
+  "correo": "zhzheng@ucm.es",
+  "password": "123456",
+  "nombre": "Zhihao",
+  "apellido": "Zheng",
+  "sexo": "H",
+  "nacimiento": "1993-10-08" }
+*/
 router.post('/nuevoUsuario', function(req, res, next) {
     var usuario = new daoUsuario(req.body);
     usuario.create(function(err, id) {
@@ -18,10 +27,30 @@ router.post('/nuevoUsuario', function(req, res, next) {
             res.status(500);
             res.end();
         } else {
+            res.status(201);
             res.json({ id: id });
         }
     });
 });
+
+// Comprobar el correo del nuevo usurio
+router.get('/comprobarCorreo', function(req, res, next) {
+  var correo = req.query.correo;
+  var usuario = new daoUsuario("undefined");
+  usuario.readByEmail(correo, function(err, length) {
+    if(err) {
+      res.status(500);
+      res.end();
+    } else {
+      if(length){
+        res.status(401);
+      } else {
+        res.status(200);
+      }
+      res.end();
+    }
+  });
+})
 
 
 // Insertar un nuevo curso
