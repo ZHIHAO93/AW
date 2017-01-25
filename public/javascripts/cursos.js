@@ -24,6 +24,8 @@ $(document).ready(function() {
 		$('#nuevo').hide();
 	});
 
+	$("#ident").on("submit", comprobarUsuario);
+
 	$("#logModal").on('hidden.bs.modal', function() {
 		$(this).find("input").val('').end();
 	})
@@ -41,10 +43,11 @@ function busqueda(e) {
 		url: "/busqueda",
 		data: {
 			str: $("#buscarPalabra").val(),
-			num: 3,
-			pos: 2},
+			num: 5,
+			pos: 0},
 		success: function(data, textStatus, jqXHR ) {
 			$("#tablaBusqueda").show();
+			console.log(data.length);
 			data.forEach(function(curso) {
 				$("#tablaBusqueda").find("tbody").append(
 					$("<tr>")
@@ -54,6 +57,7 @@ function busqueda(e) {
 						.append($("<td>").text(curso.fecha_fin))
 				);
 			});
+			$("#paginacion").show();
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
 			$("#alerts").attr("alert-warning", "alert-danger");
@@ -67,7 +71,6 @@ function nuevaCuenta(e) {
 	$('h4.modal-title').html("Nuevo usuario");
 	$('#ident').hide();
 	$('#nuevo').show();
-	$('#newCorreo').on("change", comprobarCorreo);
 	e.preventDefault();
 };
 
@@ -132,30 +135,47 @@ function printInfoCurso() {
 	});
 }
 
-function comprobarCorreo() {
-	var correo = $(this).val();
+function comprobarUsuario(e) {
+	var email = $("#correo").val();
+	var contrasena = $("#password").val();
+
+	var cadenaBase64 = btoa(email + ":" + contrasena);
 	$.ajax({
 		type: "GET",
-		url: "/comprobarCorreo",
-		data: {
-			correo: correo},
-		success: function(data, textStatus, jqXHR ) {
-			$("#notNuevoCorreo").empty();
-			$("#notNuevoCorreo")
-				.append($('<span>')
-					.prop("class", "glyphicon glyphicon-ok")
-					.prop("style", "color: #33cc33")
-				.text(" Puedes utilizar este correo"));
+		url: "/comprobarUsuario",
+		beforeSend: function(req) {
+			req.setRequestHeader("Authorization", 
+								 "Basic " + cadenaBase64);
 		},
-		error: function(jqXHR, textStatus, errorThrown ) {
-			$("#notNuevoCorreo").empty();
-			if(jqXHR.status === 401){
-				$("#notNuevoCorreo")
-				.append($('<span>')
-					.prop("class", "glyphicon glyphicon-remove")
-					.prop("style", "color: red")
-				.text(" Ya existe este correo"));
+		success: function(data, textStatus, jqXHR ) {
+			$('#correo').val('');
+			$('#password').val('');
+			$('#logModal').modal('hide');
+			if(data.permitido) {
+				console.log("Acceso permitido!");
+				$("#identificarse").parent().parent()
+					.append($('<li>').append($('<a>').prop("id","loginLabel").text(email)))
+					.append($('<li>')
+						.append($('<button>')
+							.prop("id","logout")
+							.prop("class", "btn btn-default").text('logout')));
+				$('#logout').on("click", logout);	
+				$("#identificarse").hide();
 			}
+		}
+	});
+	e.preventDefault();
+}
+
+function logout() {
+	$.ajax({
+		type: "GET",
+		url: "/logout",
+		success: function(data, textStatus, jqXHR ) {
+			console.log("Logout");
+			$("#loginLabel").parent().remove();
+			$("#logout").parent().remove();
+			$("#identificarse").show();
 		}
 	});
 }

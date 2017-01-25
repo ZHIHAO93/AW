@@ -1,9 +1,35 @@
 var express = require('express');
 var daoUsuario = require('../models/ModeloUsuario');
 var daoCurso = require('../models/ModeloCurso');
+var daoInscrito = require('../models/ModeloInscribir');
 var multer = require('multer');
 var upload = multer({ storage: multer.memoryStorage() });
 var router = express.Router();
+var passport = require('passport');
+var passportHTTP = require('passport-http');
+
+router.use(passport.initialize());
+
+var miEstrategia = 
+  new passportHTTP.BasicStrategy(
+      { realm: "Autenticaion requerida" },
+      function(user, pass, callback) {
+        var usu = new daoUsuario("undefined");
+        usu.readByEmail(user, function(err, usuario) {
+            if(err) {
+                callback(err);
+            } else {
+                if(usuario && usuario.password === pass){
+                  callback(null, user);
+                } else {
+                  callback(null, false);
+                }
+            }
+        });
+      }
+  );
+
+passport.use(miEstrategia);
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -34,24 +60,64 @@ router.post('/nuevoUsuario', function(req, res, next) {
 });
 
 // Comprobar el correo del nuevo usurio
-router.get('/comprobarCorreo', function(req, res, next) {
-  var correo = req.query.correo;
-  var usuario = new daoUsuario("undefined");
-  usuario.readByEmail(correo, function(err, length) {
-    if(err) {
-      res.status(500);
+router.get('/comprobarUsuario', 
+        passport.authenticate('basic', {session: false}), 
+        function(req, res, next) {
+          if(req.user){
+            res.json({ permitido: true });  
+          } else {
+            res.status(401);
+            res.end();
+          }
+});
+
+// hacer logout, aunque no guardamos en ningun sitio la informacion de autenticacion
+router.get('/logout', function(req, res, next) {
+    req.logout();
+    res.redirect('/');
+});
+
+// Inscribir a un curso
+/*
+{ 
+  "id_usuario": "1",
+  "id_curso": "6"}
+*/
+router.post('/inscribirCurso', function(req, res, next) {
+    var inscrito = new daoInscrito(req.body);
+    if(isNaN(req.body.id_usuario) || isNaN(req.body.id_curso)){
+      res.status(404);
       res.end();
     } else {
-      if(length){
-        res.status(401);
-      } else {
-        res.status(200);
-      }
-      res.end();
+      inscrito.create(function(err, id) {
+          if(err) {
+              res.status(500);
+              res.end();
+          } else {
+              res.status(201);
+              res.json({ id: id });
+          }
+      });
     }
-  });
-})
+});
 
+router.get('/obtencionCurso', function(req, res, next) {
+    var inscrito = new daoInscrito("undefined");
+    var idUsuario = req.query.id_usuario;
+    if(isNaN(idUsuario)){
+        res.status(404);
+        res.end();
+    } else {
+        inscrito.readCursoByUserId(idUsuario, function(err, result) {
+            if(err){
+              res.status(500);
+              res.end();
+            } else {
+              res.json(result);
+            }
+        })
+    }
+});
 
 // Insertar un nuevo curso
 /*
