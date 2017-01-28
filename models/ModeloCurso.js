@@ -11,7 +11,6 @@ function Curso(curso) {
     this.plazas = curso.plazas;
     this.fecha_ini = curso.fecha_ini;
     this.fecha_fin = curso.fecha_fin;
-    this.horario = curso.horario;
 }
 
 Curso.prototype.create = function(callback) {
@@ -125,16 +124,19 @@ Curso.prototype.read = function(id, callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "SELECT * " +
-                    "FROM cursos " +
-                    "WHERE id=" + id,
+                    "SELECT " +
+                    "c.id, c.titulo, c.descripcion, c.localidad, c.direccion, c.plazas, c.fecha_ini, c.fecha_fin, " +
+                    "GROUP_CONCAT(CONCAT(h.Dias, ': ', h.Hora_ini, '-', h.Hora_fin)) as horario " +
+                    "FROM cursos c, horarios h " +
+                    "WHERE c.id=" + id + " AND c.id = h.id_curso " +
+                    "GROUP BY c.id",
                     function(err, result) {
                         conexion.end();
                         if(err) {
                             callback(err, undefined);
                         } else {
                             if(result.length === 0){
-                                callback(null, undefined);
+                                callback(null, null);
                             } else {
                                 callback(null, result[0]);
                             }

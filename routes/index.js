@@ -1,6 +1,7 @@
 var express = require('express');
 var daoUsuario = require('../models/ModeloUsuario');
 var daoCurso = require('../models/ModeloCurso');
+var daoHorario = require('../models/ModeloHorario');
 var daoInscrito = require('../models/ModeloInscribir');
 var multer = require('multer');
 var upload = multer({ storage: multer.memoryStorage() });
@@ -130,7 +131,10 @@ router.get('/obtencionCurso', function(req, res, next) {
     "plazas":"5",
     "fecha_ini" : "2016-11-11",
     "fecha_fin":"2017-11-11",
-    "horario" : "mier. 12:00-13:00"
+    "horario" : [
+        {"dia":"mier.", "hora_ini":"12:00", "hora_fin":"13:00"},
+        {"dia":"sab.", "hora_ini":"18:00","hora_fin":"19:00"}
+    ]
 }
  */
 router.post('/nuevoCurso', function(req, res, next) {
@@ -144,7 +148,21 @@ router.post('/nuevoCurso', function(req, res, next) {
                 res.status(500);
                 res.end();
             } else {
-                res.json({ id: id });
+                var horario = new daoHorario(req.body.horario);
+                horario.insert(id, function(err, exito) {
+                    if(err) {
+                        res.status(500);
+                        res.end();
+                    } else {
+                        console.log(exito);
+                        if(exito === false){
+                          res.status(404);
+                          res.end();
+                        } else {
+                          res.json({ id: id });
+                        }
+                    }
+                });
             }
         });   
     } else {
@@ -166,7 +184,10 @@ router.post('/nuevoCurso', function(req, res, next) {
     "plazas":"5",
     "fecha_ini" : "2016-11-11",
     "fecha_fin":"2017-11-11",
-    "horario" : "mier. 12:00-13:00"
+    "horario" : [
+        {"dia":"mier.", "hora_ini":"12:00", "hora_fin":"13:00"},
+        {"dia":"sab.", "hora_ini":"18:00","hora_fin":"19:00"}
+    ]
 }
  */
 router.put('/modificaCurso', function(req, res, next) {
@@ -219,6 +240,7 @@ router.get('/leerCurso', function(req, res, next) {
    if(idCurso !== undefined && !isNaN(idCurso)) {
        curso.read(idCurso, function(err, result) {
            if(err) {
+                console.log(err);
                 res.status(500);
                 res.end();
            } else {
