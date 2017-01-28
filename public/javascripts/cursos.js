@@ -1,5 +1,9 @@
 "use strict";
 
+var numPag = 5;
+var numPos = 0;
+var currentPag = 1;
+
 $(document).ready(function() {
 	console.log("DOM inicializado");
 
@@ -37,18 +41,18 @@ $(document).ready(function() {
 });
 
 function busqueda(e) {
-	$("#tablaBusqueda").find("tbody").empty();
+	var paginas = $(this).data('pag');
+	$("#tablaBusqueda").find("tbody > tr").remove();
 	$.ajax({
 		type: "GET",
 		url: "/busqueda",
 		data: {
 			str: $("#buscarPalabra").val(),
-			num: 5,
-			pos: 0},
+			num: numPag,
+			pos: (numPos+1) * paginas},
 		success: function(data, textStatus, jqXHR ) {
 			$("#tablaBusqueda").show();
-			console.log(data.length);
-			data.forEach(function(curso) {
+			data.result.forEach(function(curso) {
 				$("#tablaBusqueda").find("tbody").append(
 					$("<tr>")
 						.append($("<td>").prop("id", curso.id).text(curso.titulo))
@@ -57,7 +61,7 @@ function busqueda(e) {
 						.append($("<td>").text(curso.fecha_fin))
 				);
 			});
-			$("#paginacion").show();
+			paginacion(data.numRow, paginas);
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
 			$("#alerts").attr("alert-warning", "alert-danger");
@@ -65,6 +69,38 @@ function busqueda(e) {
 		}
 	});
 	e.preventDefault();
+}
+
+function paginacion(numRow, current) {
+	$("#paginacion").find("ul").empty();
+	var paginas = numRow / numPag + 1;
+	var i;
+	if(paginas >= 2) {
+		$("#paginacion").find("ul")
+			.append($('<li>').prop("class", "disabled")
+				.append($('<span>').prop("aria-hidden","true").append('&laquo;')));
+	}
+	for(i=1; i<=paginas; i++) {
+		if(i === current){
+			$("#paginacion").find("ul")
+				.append($('<li>').prop("class", "active")
+					.append($('<a>')
+						.prop("href","#").text(i)));
+		} else {
+			$("#paginacion").find("ul")
+				.append($('<li>')
+					.append($('<a>')
+						.prop("href","#")
+						.attr("data-pag",i).text(i)));
+		}
+	}
+	if(paginas >= 2) {
+		$("#paginacion").find("ul")
+			.append($('<li>')
+				.append($('<span>').prop("aria-hidden","true").append('&raquo;')));
+	}
+	$("#paginacion").on("click", "a", busqueda);
+	$("#paginacion").show();
 }
 
 function nuevaCuenta(e) {

@@ -274,7 +274,8 @@ router.get('/busqueda', function(req, res, next) {
           res.status(404);
           res.end();
         } else {
-          res.json(result);
+          console.log(result);
+          res.json({result: result, numRow: result.numRow});
         }
       }
     });

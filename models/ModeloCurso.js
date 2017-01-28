@@ -174,27 +174,48 @@ Curso.prototype.readImg = function(id, callback) {
     });
 };
 
+// Funcion para sacar numero total de filas en base de datos aparezca str en el titulo de curso 
+Curso.prototype.busquedaTotal = function(str, conexion, callback) {
+    conexion.query(
+            "SELECT COUNT(*) AS num_cursos FROM cursos WHERE titulo like '%" + str + "%'",
+            function(err, numRow) {
+                if(err){
+                callback(err);
+                } else {
+                    callback(null, numRow[0]);
+                }
+            });
+};
+
 Curso.prototype.busqueda = function(str, num, pos, callback) {
     var conexion = mysql.createConnection();
+    var curso = this;
     conexion.connect(function(err) {
         if(err) {
             callback(err, "undefined");
         } else {
-            conexion.query(
-                    "SELECT id, titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
-                    "FROM cursos " +
-                    "WHERE titulo like '%" + str + "%' " +
-                    "ORDER BY fecha_ini " + 
-                    "LIMIT " + num + " OFFSET " + pos, 
-                    function(err, result) {
-                        if(err) {
-                            callback(err, "undefined");
-                        } else {
-                            conexion.end();
-                            callback(null, result);
-                        }
-                    }
-            );
+            curso.busquedaTotal(str, conexion, function(err, numRow) {
+                if(err) {
+                    callback(err);
+                } else {
+                    conexion.query(
+                            "SELECT id, titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
+                            "FROM cursos " +
+                            "WHERE titulo like '%" + str + "%' " +
+                            "ORDER BY fecha_ini " + 
+                            "LIMIT " + num + " OFFSET " + pos, 
+                            function(err, result) {
+                                if(err) {
+                                    callback(err, "undefined");
+                                } else {
+                                    conexion.end();
+                                    result.numRow = numRow.num_cursos;
+                                    callback(null, result);
+                                }
+                            }
+                    );
+                }
+            });
         }
     });
 };
