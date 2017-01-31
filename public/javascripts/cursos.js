@@ -106,7 +106,6 @@ function paginacion(numRow, current) {
 		}
 	}
 	if(paginas >= 2) {
-		console.log(paginas-current <= 1);
 		if(paginas-current <= 1){
 			$("#paginacion").find("ul")
 				.append($('<li>').prop("class", "disabled")
@@ -165,12 +164,20 @@ function printInfoCurso() {
 		data: {
 			id: idCurso},
 		success: function(data, textStatus, jqXHR ) {
+			console.log(data.imagen.data.length);
 			$("#infoCurso").modal();
 			$("#infoCurso").find("h4.modal-title").html(data.titulo);
-			$("#infoCurso").find("div.modal-body")
-				.append($('<div>').prop("class", "row")
-					.append($('<p>').prop("class", "col-lg-9").text(data.descripcion))
-					.append('<img class="pull-right col-lg-3" src="/cursos/' + idCurso + '/imagen" />'))
+			if(data.imagen.data.length === 0){
+				$("#infoCurso").find("div.modal-body")
+					.append($('<div>').prop("class", "row")
+						.append($('<p>').prop("class", "col-lg-12").text(data.descripcion)));
+			} else {
+				$("#infoCurso").find("div.modal-body")
+					.append($('<div>').prop("class", "row")
+						.append($('<p>').prop("class", "col-lg-9").text(data.descripcion))
+						.append('<img class="pull-right col-lg-3" src="/cursos/' + idCurso + '/imagen" />'));
+			}
+			$("#infoCurso").find("div.modal-body")	
 				.append($('<div>')
 					.append($('<p>').append($('<strong>').text('Lugar de impartición:')))
 					.append($('<p>').text(data.direccion)))
@@ -182,7 +189,7 @@ function printInfoCurso() {
 					.append($('<p>').text(data.horario)))
 				.append($('<div>')
 					.append($('<p>').append($('<strong>').text('Número de plazas:')))
-					.append($('<p>').text(data.plazas)))
+					.append($('<p>').text(data.plazas)));
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
 			$("#alerts").attr("alert-warning", "alert-danger");

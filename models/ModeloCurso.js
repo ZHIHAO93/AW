@@ -125,8 +125,8 @@ Curso.prototype.read = function(id, callback) {
         } else {
             conexion.query(
                     "SELECT " +
-                    "c.id, c.titulo, c.descripcion, c.localidad, c.direccion, c.plazas, c.fecha_ini, c.fecha_fin, " +
-                    "GROUP_CONCAT(CONCAT(h.Dias, ': ', h.Hora_ini, '-', h.Hora_fin)) as horario " +
+                    "c.id, c.titulo, c.descripcion, c.localidad, c.direccion, c.imagen, c.plazas, c.fecha_ini, c.fecha_fin, " +
+                    "GROUP_CONCAT(CONCAT(h.Dias, ' ', h.Hora_ini, '-', h.Hora_fin)) as horario " +
                     "FROM cursos c, horarios h " +
                     "WHERE c.id=" + id + " AND c.id = h.id_curso " +
                     "GROUP BY c.id",
