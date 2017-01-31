@@ -1,13 +1,14 @@
 "use strict";
 
 var numPag = 5;
-var numPos = 0;
 var currentPag = 1;
 
 $(document).ready(function() {
 	console.log("DOM inicializado");
 
 	$("#alerts").hide();
+
+	$("#paginacion").on("click", "a", busqueda);
 
 	$("#tablaBusqueda").hide();
 
@@ -49,7 +50,7 @@ function busqueda(e) {
 		data: {
 			str: $("#buscarPalabra").val(),
 			num: numPag,
-			pos: (numPos+1) * paginas},
+			pos: (paginas-1) * numPag},
 		success: function(data, textStatus, jqXHR ) {
 			$("#tablaBusqueda").show();
 			data.result.forEach(function(curso) {
@@ -64,6 +65,7 @@ function busqueda(e) {
 			paginacion(data.numRow, paginas);
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
+			$("#paginacion").find("ul").empty();
 			$("#alerts").attr("alert-warning", "alert-danger");
 			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
 		}
@@ -76,9 +78,18 @@ function paginacion(numRow, current) {
 	var paginas = numRow / numPag + 1;
 	var i;
 	if(paginas >= 2) {
-		$("#paginacion").find("ul")
-			.append($('<li>').prop("class", "disabled")
-				.append($('<span>').prop("aria-hidden","true").append('&laquo;')));
+		if(current !== 1){
+			$("#paginacion").find("ul")
+				.append($('<li>')
+					.append($('<a>')
+						.prop("href", "#")
+						.attr("data-pag", current-1)
+					.append($('<span>').prop("aria-hidden","true").append('&laquo;'))));
+		} else {
+			$("#paginacion").find("ul")
+				.append($('<li>').prop("class", "disabled")
+					.append($('<span>').prop("aria-hidden","true").append('&laquo;')));
+		}
 	}
 	for(i=1; i<=paginas; i++) {
 		if(i === current){
@@ -95,11 +106,20 @@ function paginacion(numRow, current) {
 		}
 	}
 	if(paginas >= 2) {
-		$("#paginacion").find("ul")
-			.append($('<li>')
-				.append($('<span>').prop("aria-hidden","true").append('&raquo;')));
+		console.log(paginas-current <= 1);
+		if(paginas-current <= 1){
+			$("#paginacion").find("ul")
+				.append($('<li>').prop("class", "disabled")
+					.append($('<span>').prop("aria-hidden","true").append('&raquo;')));
+		} else {
+			$("#paginacion").find("ul")
+				.append($('<li>')
+					.append($('<a>')
+						.prop("href", "#")
+						.attr("data-pag", current+1)
+					.append($('<span>').prop("aria-hidden","true").append('&raquo;'))));
+		}
 	}
-	$("#paginacion").on("click", "a", busqueda);
 	$("#paginacion").show();
 }
 
