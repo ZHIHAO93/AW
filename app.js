@@ -4,12 +4,20 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var https = require('https');
+var fs = require('fs');
+
+var clavePrivada = fs.readFileSync("./clave_privada.pem");
+var certificado = fs.readFileSync("./certificado_firmado.crt");
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var config = require('./config');
 
 var app = express();
+
+var servidor = https.createServer(
+        { key: clavePrivada, cert: certificado}, app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -44,7 +52,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(config.port, function(){
+servidor.listen(config.port, function(){
     console.log('Express server listening on port ' + config.port);
 });
 
