@@ -190,6 +190,14 @@ Curso.prototype.busquedaTotal = function(str, conexion, callback) {
 Curso.prototype.busqueda = function(str, num, pos, callback) {
     var conexion = mysql.createConnection();
     var curso = this;
+    var sql = "SELECT id, titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin," + 
+                            "(plazas-COUNT(inscrito.id_usuario)) AS vacantes " +
+                            "FROM (SELECT * FROM cursos WHERE titulo like '%" + str + "%' " +
+                            "ORDER BY fecha_ini " + 
+                            "LIMIT " + num + " OFFSET " + pos +
+                            ") AS cursos " +
+                            "LEFT JOIN inscrito ON cursos.id=inscrito.id_curso " +
+                            "GROUP BY cursos.id ";
     conexion.connect(function(err) {
         if(err) {
             callback(err, "undefined");
@@ -199,11 +207,7 @@ Curso.prototype.busqueda = function(str, num, pos, callback) {
                     callback(err);
                 } else {
                     conexion.query(
-                            "SELECT id, titulo, localidad,  Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " + 
-                            "FROM cursos " +
-                            "WHERE titulo like '%" + str + "%' " +
-                            "ORDER BY fecha_ini " + 
-                            "LIMIT " + num + " OFFSET " + pos, 
+                            sql, 
                             function(err, result) {
                                 if(err) {
                                     callback(err, "undefined");
@@ -223,7 +227,7 @@ Curso.prototype.busqueda = function(str, num, pos, callback) {
 Curso.prototype.readProximos = function(idUsuario, callback) {
     var conexion = mysql.createConnection();
     var sql = "SELECT " + 
-                    "c.titulo, c.localidad, c.fecha_ini, fecha_fin " +
+                    "titulo, localidad, Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " +
                "FROM " + 
                     "inscrito i, cursos c " +
                "WHERE " +
@@ -254,7 +258,7 @@ Curso.prototype.readProximos = function(idUsuario, callback) {
 Curso.prototype.readRealizados = function(idUsuario, callback) {
     var conexion = mysql.createConnection();
     var sql = "SELECT " + 
-                    "c.titulo, c.localidad, c.fecha_ini, fecha_fin " +
+                    "titulo, localidad, Date_format(fecha_ini, '%d-%m-%Y') as fecha_ini,  Date_format(fecha_fin, '%d-%m-%Y') as fecha_fin " +
                "FROM " + 
                     "inscrito i, cursos c " +
                "WHERE " +

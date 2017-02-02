@@ -26,6 +26,8 @@ $(document).ready(function() {
 
 	$("#misCursos").hide();
 
+	$("#navMisCursos").hide();
+
 	$("#navMisCursos").on("click", mostrarMisCursos);
 
 	$("#logo").on("click", function(e) {
@@ -65,15 +67,22 @@ function busqueda(e) {
 			num: numPag,
 			pos: (paginas-1) * numPag},
 		success: function(data, textStatus, jqXHR ) {
-			$("#tablaBusqueda").show();
+			var tabla = $("#tablaBusqueda");
+			tabla.show();
 			data.result.forEach(function(curso) {
-				$("#tablaBusqueda").find("tbody").append(
+				tabla.find("tbody").append(
 					$("<tr>")
 						.append($("<td>").prop("id", curso.id).text(curso.titulo))
 						.append($("<td>").text(curso.localidad))
 						.append($("<td>").text(curso.fecha_ini))
 						.append($("<td>").text(curso.fecha_fin))
+						.append($("<td>").text(curso.vacantes))
 				);
+				if(curso.vacantes === 0) {
+					$("#tablaBusqueda:last-child table>tbody>tr:last").addClass("danger");
+				} else if(curso.vacantes === 1) {
+					$("#tablaBusqueda:last-child table>tbody>tr:last").addClass("warning");
+				}
 			});
 			paginacion(data.numRow, paginas);
 		},
@@ -223,7 +232,6 @@ function comprobarUsuario(e) {
 			if(data.permitido) {
 				console.log("Acceso permitido!");
 				user = data.id;
-				console.log(user);
 				$("#identificarse").parent().parent()
 					.append($('<li>').append($('<a>').prop("id","loginLabel").text(email)))
 					.append($('<li>')
@@ -232,6 +240,7 @@ function comprobarUsuario(e) {
 							.prop("class", "btn btn-default").text('logout')));
 				$('#logout').on("click", logout);	
 				$("#identificarse").hide();
+				$("#navMisCursos").show();
 			}
 		}
 	});
@@ -284,6 +293,7 @@ function mostrarMisCursos(e) {
 }
 
 function cargarProximosCursos() {
+	$("#tablaProximos").find("tbody > tr").remove();
 	$.ajax({
 		type: "GET",
 		url: "/usuario/" + user + "/proximosCursos",
@@ -302,6 +312,7 @@ function cargarProximosCursos() {
 }
 
 function cargarCursosRealizados() {
+	$("#tablaRealizados").find("tbody > tr").remove();
 	$.ajax({
 		type: "GET",
 		url: "/usuario/" + user + "/cursosRealizados",
