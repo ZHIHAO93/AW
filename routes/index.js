@@ -21,7 +21,7 @@ var miEstrategia =
                 callback(err);
             } else {
                 if(usuario && usuario.password === pass){
-                  callback(null, user);
+                  callback(null, usuario);
                 } else {
                   callback(null, false);
                 }
@@ -65,7 +65,7 @@ router.get('/comprobarUsuario',
         passport.authenticate('basic', {session: false}), 
         function(req, res, next) {
           if(req.user){
-            res.json({ permitido: true });  
+            res.json({ permitido: true, id: req.user.id });  
           } else {
             res.status(401);
             res.end();
@@ -85,6 +85,7 @@ router.get('/logout', function(req, res, next) {
   "id_curso": "6"}
 */
 router.post('/inscribirCurso', function(req, res, next) {
+    console.log(req.body);
     var inscrito = new daoInscrito(req.body);
     if(isNaN(req.body.id_usuario) || isNaN(req.body.id_curso)){
       res.status(404);
@@ -309,6 +310,7 @@ router.put('/cursos/:id/imagen', upload.single("imagen"), function(req, res, nex
 
 });
 
+// Leer imagen de un curso
 router.get('/cursos/:id/imagen', function(req, res, next) {
   var idCurso = Number(req.params.id);
   if(isNaN(idCurso)){
@@ -330,5 +332,48 @@ router.get('/cursos/:id/imagen', function(req, res, next) {
   }
 });
 
+// leer los cursos proximos
+router.get('/usuario/:id/proximosCursos', function(req, res, next) {
+    var idUsuario = req.params.id;
+    if(isNaN(idUsuario)){
+        next(new Error("Id no es numerico!"));
+    } else {
+        var curso = new daoCurso("undefined");
+        curso.readProximos(idUsuario, function(err, cursos) {
+            if(err) {
+                next(err);
+            } else {
+                if(cursos){
+                  res.json(cursos);
+                } else {
+                  res.status(404);
+                  res.end("Not found");
+                }
+            }
+        });
+    }
+});
+
+// leer los cursos realizados
+router.get('/usuario/:id/cursosRealizados', function(req, res, next) {
+    var idUsuario = req.params.id;
+    if(isNaN(idUsuario)){
+        next(new Error("Id no es numerico!"));
+    } else {
+        var curso = new daoCurso("undefined");
+        curso.readRealizados(idUsuario, function(err, cursos) {
+            if(err) {
+                next(err);
+            } else {
+                if(cursos){
+                  res.json(cursos);
+                } else {
+                  res.status(404);
+                  res.end("Not found");
+                }
+            }
+        });
+    }
+});
 
 module.exports = router;

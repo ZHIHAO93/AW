@@ -9,3 +9,7 @@ body {
 #jumbo > ul > li {
 	font-size: 20px;
 }
+
+thead > tr {
+	font-weight: bold;
+}

@@ -41,7 +41,7 @@ Usuario.prototype.readByEmail = function(correo, callback) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "SELECT correo, password FROM usuarios WHERE correo='" + correo + "'",
+                    "SELECT id, correo, password FROM usuarios WHERE correo='" + correo + "'",
                     function(err, result) {
                         conexion.end();
                         if(err) {

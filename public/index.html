@@ -19,7 +19,10 @@
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li class="active">
-						<a id="busqueda" href="">Buscar cursos</a>
+						<a id="busqueda" href="#">Buscar cursos</a>
+					</li>
+					<li class="desactive">
+						<a id="navMisCursos" href="#">Mis cursos</a>
 					</li>
 				</ul>
 
@@ -32,70 +35,123 @@
 		</div>
 	</nav>
 
-	<div id="alerts" class="alert alert-warning alert-dismissible" role="alert">
-		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		<p></p>
-	</div>
-
 		<!-- Contenido -->
 		<div id="contenido" class="container">
-		<!-- Titulo -->
-		<div class="page-header">
-			<h1>Búsqueda de cursos</h1>
+			<!-- Titulo -->
+			<div id="divBusqueda">
+			<div class="page-header">
+				<h1>Búsqueda de cursos</h1>
+			</div>
+
+			<!-- busqueda -->
+			<form id="buscar" class="form-inline" role="form" data-pag='1'>
+	    		<div class="form-group">
+	                <label for="buscar"><strong>Búsqueda por nombre: &nbsp;</strong></label>
+			    <div class="input-group">
+	                                    
+					<input type="text" id="buscarPalabra" class="form-control" placeholder="palabra clave...">
+					<span class="input-group-btn">
+						<button class="btn btn-primary btn-large" type="submit">
+							<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+							<span class="glyphicon-class">Búscar</span>
+						</button>
+					</span>
+				</div>
+				</div>
+			</form>
+
+	    	<!-- contenido -->
+	    	<div id="tablaBusqueda" class="panel">
+		    	<div class="table-responsive">
+
+		    	<!-- cabecera de la lista-->
+		    	<table class="table table-striped table-hover table-condensed">
+		    		<thead>
+		    			<tr>
+		    				<td class="col-lg-5"><strong>Nombre</strong></td>
+		    				<td class="col-lg-2"><strong>Lugar</strong></td>
+		    				<td class="col-lg-2"><strong>Inicio</strong></td>
+		    				<td class="col-lg-2"><strong>Fin</strong></td>
+		    				<td class="col-lg-1"><strong>Vacantes</strong></td>
+		    			</tr>
+		    		</thead>
+		    		<tbody></tbody>	
+		    	</table>
+
+			    <nav id="paginacion" aria-label="Page navigation" class="col-lg-7 col-lg-offset-5">
+			    	<ul class="pagination">
+			    		<li class="disabled">
+			    			<span>
+			    				<span aria-hidden="true">&laquo;</span>
+			    			</span>
+			    		</li>
+			    		<li class="active"><a href="#">1</a></li>
+			    		<li><a href="#">2</a></li>
+			    		<li>
+			    			<span>
+			    				<span aria-hidden="true">&raquo;</span>
+			    			</span>
+					    </li>
+			    	</ul>
+			    </nav>
+				</div>
+			</div>
 		</div>
-
-		<!-- busqueda -->
-		<form id="buscar" class="form-inline" role="form" data-pag='1'>
-    		<div class="form-group">
-                <label for="buscar"><strong>Búsqueda por nombre: &nbsp;</strong></label>
-		    <div class="input-group">
-                                    
-				<input type="text" id="buscarPalabra" class="form-control" placeholder="palabra clave...">
-				<span class="input-group-btn">
-					<button class="btn btn-primary btn-large" type="submit">
-						<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-						<span class="glyphicon-class">Búscar</span>
-					</button>
-				</span>
+		<div id="misCursos" class="container">
+			<div class="page-header">
+				<h1>Próximos cursos</h1>
 			</div>
-			</div>
-		</form>
-
-    	<!-- contenido -->
-    	<div id="tablaBusqueda" class="panel">
 	    	<div class="table-responsive">
+		    	<table id="tablaProximos" class="table">
+		    		<thead>
+		    			<tr>
+		    				<td class="col-lg-5">Nombre</td>
+		    				<td class="col-lg-2">Lugar</td>
+		    				<td class="col-lg-2">Inicio</td>
+		    				<td class="col-lg-2">Fin</td>
+		    			</tr>
+		    		</thead>
+		    		<tbody></tbody>	
+		    	</table>
+	    	</div>
 
-	    	<!-- cabecera de la lista-->
-	    	<table class="table table-striped table-hover table-condensed">
-	    		<thead>
-	    			<tr>
-	    				<td class="col-lg-5"><strong>Nombre</strong></td>
-	    				<td class="col-lg-2"><strong>Lugar</strong></td>
-	    				<td class="col-lg-2"><strong>Inicio</strong></td>
-	    				<td class="col-lg-2"><strong>Fin</strong></td>
-	    				<td class="col-lg-1"><strong>Vacantes</strong></td>
-	    			</tr>
-	    		</thead>
-	    		<tbody></tbody>	
-	    	</table>
-
-		    <nav id="paginacion" aria-label="Page navigation" class="col-lg-7 col-lg-offset-5">
-		    	<ul class="pagination">
-		    		<li class="disabled">
-		    			<span>
-		    				<span aria-hidden="true">&laquo;</span>
-		    			</span>
-		    		</li>
-		    		<li class="active"><a href="#">1</a></li>
-		    		<li><a href="#">2</a></li>
-		    		<li>
-		    			<span>
-		    				<span aria-hidden="true">&raquo;</span>
-		    			</span>
-				    </li>
-		    	</ul>
-		    </nav>
+			<div class="page-header">
+				<h1>Cursos realizados</h1>
 			</div>
+	    	<div class="table-responsive">
+		    	<table id="tablaRealizados" class="table">
+		    		<thead>
+		    			<tr>
+		    				<td class="col-lg-5">Nombre</td>
+		    				<td class="col-lg-2">Lugar</td>
+		    				<td class="col-lg-2">Inicio</td>
+		    				<td class="col-lg-2">Fin</td>
+		    			</tr>
+		    		</thead>
+		    		<tbody></tbody>	
+		    	</table>
+	    	</div>
+
+			<div class="page-header">
+				<h1>Tu horario</h1>
+			</div>
+			<div class="table-responsive">
+		    	<table class="table table-striped table-hover table-condensed">
+		    		<thead>
+		    			<tr>
+		    				<td>Hora</td>
+		    				<td>Lunes</td>
+		    				<td>Martes</td>
+		    				<td>Miércoles</td>
+		    				<td>Jueves</td>
+		    				<td>Viernes</td>
+		    				<td>Sábado</td>
+		    				<td>Domingo</td>
+		    			</tr>
+		    		</thead>
+		    		<tbody></tbody>	
+		    	</table>
+	    	</div>
 		</div>
 	</div>
 
@@ -184,7 +240,7 @@
 	</div>
 
 	<!-- informacion curso modal -->
-	<div id="infoCurso" class="modal fade" id="logModal" role="dialog">
+	<div id="infoCurso" class="modal fade" role="dialog">
 		<div class="modal-dialog">
 			<!-- Modal content-->
 			<div class="modal-content">
@@ -202,6 +258,10 @@
 			</div>
 	    </div> 
 	</div>
+
+	
+
+
 
 
 	<script src='/javascripts/jquery-3.1.1.min.js'></script>

@@ -220,4 +220,66 @@ Curso.prototype.busqueda = function(str, num, pos, callback) {
     });
 };
 
+Curso.prototype.readProximos = function(idUsuario, callback) {
+    var conexion = mysql.createConnection();
+    var sql = "SELECT " + 
+                    "c.titulo, c.localidad, c.fecha_ini, fecha_fin " +
+               "FROM " + 
+                    "inscrito i, cursos c " +
+               "WHERE " +
+                    "i.id_usuario=" + idUsuario + " AND i.id_curso=c.id AND c.fecha_ini > CURDATE()";
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    sql,
+                    function(err, result) {
+                        conexion.end();
+                        if(err) {
+                            callback(err, undefined);
+                        } else {
+                            if(result.length === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
+Curso.prototype.readRealizados = function(idUsuario, callback) {
+    var conexion = mysql.createConnection();
+    var sql = "SELECT " + 
+                    "c.titulo, c.localidad, c.fecha_ini, fecha_fin " +
+               "FROM " + 
+                    "inscrito i, cursos c " +
+               "WHERE " +
+                    "i.id_usuario=" + idUsuario + " AND i.id_curso=c.id AND c.fecha_ini <= CURDATE()";
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    sql,
+                    function(err, result) {
+                        conexion.end();
+                        if(err) {
+                            callback(err, undefined);
+                        } else {
+                            if(result.length === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
 module.exports = Curso;

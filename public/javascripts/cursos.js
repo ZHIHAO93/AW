@@ -1,12 +1,20 @@
 "use strict";
 
+var user = 0;
+var curso = 0;
 var numPag = 5;
 var currentPag = 1;
 
 $(document).ready(function() {
 	console.log("DOM inicializado");
 
-	$("#alerts").hide();
+	$("#busqueda").on("click", function(e) {
+		$("#busqueda").parent().attr("class", "active");
+		$("#navMisCursos").parent().attr("class", "desactive");
+		$("#divBusqueda").show();
+		$("#misCursos").hide();
+		e.preventDefault();
+	})
 
 	$("#paginacion").on("click", "a", busqueda);
 
@@ -15,6 +23,10 @@ $(document).ready(function() {
 	$("#tablaBusqueda").on("click", "tbody > tr", printInfoCurso)
 
 	$("#paginacion").hide();
+
+	$("#misCursos").hide();
+
+	$("#navMisCursos").on("click", mostrarMisCursos);
 
 	$("#logo").on("click", function(e) {
 		e.preventDefault();
@@ -39,6 +51,7 @@ $(document).ready(function() {
 
 	$("#formNuevoUsuario").on("submit", nuevoUsuario);
 
+	$("#bInscribirse").on("click", inscribirCurso);
 });
 
 function busqueda(e) {
@@ -66,8 +79,6 @@ function busqueda(e) {
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
 			$("#paginacion").find("ul").empty();
-			$("#alerts").attr("alert-warning", "alert-danger");
-			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
 		}
 	});
 	e.preventDefault();
@@ -142,14 +153,10 @@ function nuevoUsuario(e) {
 			sexo: $("#sexo").val(),
 			nacimiento: $("#nacimiento").val() }),
 		success: function(data, textStatus, jqXHR ) {
-			$("#alerts").toggleClass('alert-warning alert-success');
-			$("#alerts").find("p").html("usuario insertado con id " + data.id);
-			$("#alerts").show();
 			$('#logModal').modal('hide');
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
-			$("#alerts").attr("alert-warning", "alert-danger");
-			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
+		
 		}
 	});
 	e.preventDefault();
@@ -164,9 +171,9 @@ function printInfoCurso() {
 		data: {
 			id: idCurso},
 		success: function(data, textStatus, jqXHR ) {
-			console.log(data.imagen.data.length);
+			curso = idCurso;
 			$("#infoCurso").modal();
-			$("#infoCurso").find("h4.modal-title").html(data.titulo);
+			$("#infoCurso").find("h4.modal-title").text(data.titulo);
 			if(data.imagen.data.length === 0){
 				$("#infoCurso").find("div.modal-body")
 					.append($('<div>').prop("class", "row")
@@ -192,8 +199,7 @@ function printInfoCurso() {
 					.append($('<p>').text(data.plazas)));
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
-			$("#alerts").attr("alert-warning", "alert-danger");
-			$("#alerts").find("p").html("Se ha producido un error: " + errorThrown + textStatus);
+		
 		}
 	});
 }
@@ -216,6 +222,8 @@ function comprobarUsuario(e) {
 			$('#logModal').modal('hide');
 			if(data.permitido) {
 				console.log("Acceso permitido!");
+				user = data.id;
+				console.log(user);
 				$("#identificarse").parent().parent()
 					.append($('<li>').append($('<a>').prop("id","loginLabel").text(email)))
 					.append($('<li>')
@@ -236,9 +244,77 @@ function logout() {
 		url: "/logout",
 		success: function(data, textStatus, jqXHR ) {
 			console.log("Logout");
+			user = 0;
+			curso = 0;
 			$("#loginLabel").parent().remove();
 			$("#logout").parent().remove();
 			$("#identificarse").show();
+		}
+	});
+}
+
+function inscribirCurso() {
+	$.ajax({
+		type: "POST",
+		url: "/inscribirCurso",
+		contentType: "application/json",
+		data: JSON.stringify({
+			id_usuario: user,
+			id_curso: curso}),
+		success: function(data, textStatus, jqXHR ) {
+			$("#infoCurso").modal('hide');
+		},
+		error: function(jqXHR, textStatus, errorThrown ) {
+		
+		}
+	});
+
+}
+
+function mostrarMisCursos(e) {
+	$("#busqueda").parent().attr("class", "desactive");
+	$("#navMisCursos").parent().attr("class", "active");
+	$("#divBusqueda").hide();
+	$("#misCursos").show();
+
+	cargarProximosCursos();
+	cargarCursosRealizados();
+
+	e.preventDefault();
+}
+
+function cargarProximosCursos() {
+	$.ajax({
+		type: "GET",
+		url: "/usuario/" + user + "/proximosCursos",
+		success: function(data, textStatus, jqXHR ) {
+			data.forEach(function(curso) {
+				$("#tablaProximos").find("tbody").append(
+					$("<tr>")
+						.append($("<td>").prop("id", curso.id).text(curso.titulo))
+						.append($("<td>").text(curso.localidad))
+						.append($("<td>").text(curso.fecha_ini))
+						.append($("<td>").text(curso.fecha_fin))
+				);
+			});
+		}
+	});
+}
+
+function cargarCursosRealizados() {
+	$.ajax({
+		type: "GET",
+		url: "/usuario/" + user + "/cursosRealizados",
+		success: function(data, textStatus, jqXHR ) {
+			data.forEach(function(curso) {
+				$("#tablaRealizados").find("tbody").append(
+					$("<tr>")
+						.append($("<td>").prop("id", curso.id).text(curso.titulo))
+						.append($("<td>").text(curso.localidad))
+						.append($("<td>").text(curso.fecha_ini))
+						.append($("<td>").text(curso.fecha_fin))
+				);
+			});
 		}
 	});
 }
