@@ -205,7 +205,7 @@ function printInfoCurso() {
 					.append($('<p>').text(data.horario)))
 				.append($('<div>')
 					.append($('<p>').append($('<strong>').text('Número de plazas:')))
-					.append($('<p>').text(data.plazas)));
+					.append($('<p>').text(data.plazas + " (" + data.vacantes + " vacantes)")));
 		},
 		error: function(jqXHR, textStatus, errorThrown ) {
 		

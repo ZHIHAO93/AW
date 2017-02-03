@@ -119,17 +119,19 @@ Curso.prototype.delete = function(id, callback) {
 
 Curso.prototype.read = function(id, callback) {
     var conexion = mysql.createConnection();
+    var sql = "SELECT id, titulo, descripcion, localidad, direccion, imagen, plazas, fecha_ini, fecha_fin, horario, (plazas-COUNT(inscrito.id_usuario)) AS vacantes " +
+              "FROM (" + 
+              "SELECT *, GROUP_CONCAT(CONCAT(Dias,' ',Hora_ini,'-',Hora_fin)) AS horario " +
+              "FROM cursos, horarios " +
+              "WHERE id = " + id + " AND id = id_curso ) AS cursos INNER JOIN inscrito " +
+              "ON cursos.id = inscrito.id_curso " +
+              "GROUP BY inscrito.id_curso";
     conexion.connect(function(err) {
         if(err) {
             callback(err, "undefined");
         } else {
             conexion.query(
-                    "SELECT " +
-                    "c.id, c.titulo, c.descripcion, c.localidad, c.direccion, c.imagen, c.plazas, c.fecha_ini, c.fecha_fin, " +
-                    "GROUP_CONCAT(CONCAT(h.Dias, ' ', h.Hora_ini, '-', h.Hora_fin)) as horario " +
-                    "FROM cursos c, horarios h " +
-                    "WHERE c.id=" + id + " AND c.id = h.id_curso " +
-                    "GROUP BY c.id",
+                    sql,
                     function(err, result) {
                         conexion.end();
                         if(err) {
