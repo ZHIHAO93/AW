@@ -1,0 +1,15 @@
+body {
+	padding: 70px 0px 0px 0px;
+}
+
+.navbar-nav > li > button {
+    margin-top: 8px;
+}
+
+#jumbo > ul > li {
+	font-size: 20px;
+}
+
+thead > tr {
+	font-weight: bold;
+}
