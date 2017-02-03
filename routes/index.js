@@ -376,4 +376,38 @@ router.get('/usuario/:id/cursosRealizados', function(req, res, next) {
     }
 });
 
+// leer la franja de las horas
+router.get('/usuario/:id/franjaHorario', function(req, res, next) {
+    var idUsuario = req.params.id;
+    var ini = req.query.ini;
+    var fin = req.query.fin;
+    if(isNaN(idUsuario)){
+        next(new Error("Id no es numerico!"));
+    } else {
+        var curso = new daoCurso("undefined");
+        curso.franjaHorario(idUsuario, ini, fin, function(err, cursos) {
+            if(err) {
+                next(err);
+            } else {
+                if(cursos){
+                  var horas = ["00:00", "24:00"];
+                  cursos.forEach(function(obj) {
+                    if(horas.indexOf(obj.Hora_ini) === -1){
+                        horas.push(obj.Hora_ini);
+                    }
+                    if(horas.indexOf(obj.Hora_fin) === -1){
+                        horas.push(obj.Hora_fin);
+                    }
+                  });
+                  horas.sort();
+                  res.json({ horario: horas, curso: cursos });
+                } else {
+                  res.status(404);
+                  res.end("Not found");
+                }
+            }
+        });
+    }
+});
+
 module.exports = router;

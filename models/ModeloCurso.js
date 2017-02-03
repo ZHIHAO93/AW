@@ -288,4 +288,39 @@ Curso.prototype.readRealizados = function(idUsuario, callback) {
     });
 };
 
+Curso.prototype.franjaHorario = function(idUsuario, ini, fin, callback) {
+    var conexion = mysql.createConnection();
+    var sql = "SELECT titulo, Dias, Hora_ini, Hora_fin " +
+              "FROM cursos INNER JOIN horarios " +
+              "ON cursos.id = horarios.id_curso AND cursos.id IN ( " +
+                "SELECT id_curso " +
+                "FROM inscrito " +
+                "WHERE inscrito.id_usuario=" + idUsuario + ") " +
+                "AND ( " +
+                "(cursos.fecha_ini BETWEEN CURDATE() + INTERVAL " + ini + " DAY AND CURDATE() + INTERVAL " + fin + " DAY) OR(" +
+                "cursos.fecha_fin BETWEEN CURDATE() + INTERVAL " + ini + " DAY AND CURDATE() + INTERVAL " + fin + " DAY) OR(" +
+                "cursos.fecha_ini <= CURDATE() + INTERVAL " + ini + " DAY AND cursos.fecha_fin >= CURDATE() + INTERVAL " + fin + " DAY))";
+    conexion.connect(function(err) {
+        if(err) {
+            callback(err, "undefined");
+        } else {
+            conexion.query(
+                    sql,
+                    function(err, result) {
+                        conexion.end();
+                        if(err) {
+                            callback(err, undefined);
+                        } else {
+                            if(result.length === 0){
+                                callback(null, undefined);
+                            } else {
+                                callback(null, result);
+                            }
+                        }
+                    }
+            );
+        }
+    });
+};
+
 module.exports = Curso;

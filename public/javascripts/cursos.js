@@ -1,20 +1,20 @@
 "use strict";
 
-var user = 0;
-var curso = 0;
-var numPag = 5;
-var currentPag = 1;
+var user;
+var curso;
+var numPag;
+var currentPag;
+var ini;
+var fin;
+var d;
+var dia;
 
 $(document).ready(function() {
 	console.log("DOM inicializado");
 
-	$("#busqueda").on("click", function(e) {
-		$("#busqueda").parent().attr("class", "active");
-		$("#navMisCursos").parent().attr("class", "desactive");
-		$("#divBusqueda").show();
-		$("#misCursos").hide();
-		e.preventDefault();
-	})
+	inicializarValorGlobal();
+
+	$("#busqueda").on("click", navBusqueda);
 
 	$("#paginacion").on("click", "a", busqueda);
 
@@ -54,7 +54,41 @@ $(document).ready(function() {
 	$("#formNuevoUsuario").on("submit", nuevoUsuario);
 
 	$("#bInscribirse").on("click", inscribirCurso);
+
+	$("#pagHorario li.previous").on("click", function(e) {
+		ini -= 6;
+		fin -= 6;
+		mostrarMisCursos(e);
+	})
+
+	$("#pagHorario li.next").on("click", function(e) {
+		ini += 6;
+		fin += 6;
+		mostrarMisCursos(e);
+	})
 });
+
+function inicializarValorGlobal() {
+	user = 0;
+	curso = 0;
+	numPag = 5;
+	currentPag = 1;
+	ini = 0;
+	fin = 6;
+	d = new Date();
+	d.setDate(d.getDate() + ini);
+	dia = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+}
+
+function navBusqueda(e){
+	$("#busqueda").parent().attr("class", "active");
+	$("#navMisCursos").parent().attr("class", "desactive");
+	$("#divBusqueda").show();
+	$("#misCursos").hide();
+	if(e){
+		e.preventDefault();
+	}
+}
 
 function busqueda(e) {
 	var paginas = $(this).data('pag');
@@ -236,6 +270,7 @@ function comprobarUsuario(e) {
 					.append($('<li>').append($('<a>').prop("id","loginLabel").text(email)))
 					.append($('<li>')
 						.append($('<button>')
+							.prop("action", "/")
 							.prop("id","logout")
 							.prop("class", "btn btn-default").text('logout')));
 				$('#logout').on("click", logout);	
@@ -258,6 +293,9 @@ function logout() {
 			$("#loginLabel").parent().remove();
 			$("#logout").parent().remove();
 			$("#identificarse").show();
+			$("#navMisCursos").hide();
+			navBusqueda();
+			inicializarValorGlobal();
 		}
 	});
 }
@@ -288,6 +326,7 @@ function mostrarMisCursos(e) {
 
 	cargarProximosCursos();
 	cargarCursosRealizados();
+	cargarFranjaHorarios();
 
 	e.preventDefault();
 }
@@ -328,4 +367,51 @@ function cargarCursosRealizados() {
 			});
 		}
 	});
+}
+
+function cargarFranjaHorarios() {
+	$("#tablaHorarios").find("tbody > tr").remove();
+	$.ajax({
+		type: "GET",
+		url: "/usuario/" + user + "/franjaHorario",
+		data: {
+			ini: ini,
+			fin: fin
+		},
+		success: function(data, textStatus, jqXHR ) {
+			for(var i=0; i < data.horario.length-1; i++){
+				$("#tablaHorarios").find("tbody").append(
+					$("<tr>")
+						.append($("<td>").text(data.horario[i] + "-" + data.horario[i+1]))
+				);
+				var cur;
+				var semana = ["Lun", "Mar", "Mier", "Jue", "Vie", "Sab", "Dom"];
+				for(var j = 0; j < 7; j++) {
+					cur = filterCurso(data.curso, semana[j], data.horario[i], data.horario[i+1]);
+					if(cur){
+						$("#tablaHorarios tbody>tr:last")
+						.append($("<td>").addClass("success").text(cur.titulo));
+					} else {
+						$("#tablaHorarios tbody>tr:last")
+						.append($("<td>"));
+					}
+				}
+			}
+			var today = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+			d.setDate(d.getDate() + 6);
+			var nextWeek = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+			$("#pagHorario ul").children('li').eq(1).empty();
+			$("#pagHorario ul").children('li').eq(1).html(today + '&nbsp;-&nbsp;' + nextWeek);
+		}
+	});	
+}
+
+function filterCurso(cursos, dia, horaIni, horaFin) {
+	var cur = null;
+	cursos.forEach(function(obj) {
+		if(obj.Dias === dia && obj.Hora_ini === horaIni && obj.Hora_fin <= horaFin){
+			cur = obj;
+		}
+	});
+	return cur;
 }
