@@ -237,7 +237,6 @@ router.delete('/eliminarCurso', function(req, res, next) {
 // http://localhost:3000/leerCurso?id=2
 router.get('/leerCurso', function(req, res, next) {
    var idCurso = Number(req.query.id);
-   console.log(idCurso);
    var curso = new daoCurso("undefined");
    if(idCurso !== undefined && !isNaN(idCurso)) {
        curso.read(idCurso, function(err, result) {
