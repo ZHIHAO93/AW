@@ -186,8 +186,8 @@ router.post('/nuevoCurso', function(req, res, next) {
     "fecha_ini" : "2016-11-11",
     "fecha_fin":"2017-11-11",
     "horario" : [
-        {"dia":"mier.", "hora_ini":"12:00", "hora_fin":"13:00"},
-        {"dia":"sab.", "hora_ini":"18:00","hora_fin":"19:00"}
+        {"dia":"Mier", "hora_ini":"12:00", "hora_fin":"13:00"},
+        {"dia":"Sab", "hora_ini":"18:00","hora_fin":"19:00"}
     ]
 }
  */
