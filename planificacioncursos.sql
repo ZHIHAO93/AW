@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: 2017-01-09 09:10:05
+-- Generation Time: 2017-02-03 18:17:15
 -- 服务器版本： 10.1.9-MariaDB
 -- PHP Version: 5.6.15
 
@@ -28,14 +28,27 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `cursos` (
   `id` int(10) NOT NULL,
-  `titulo` varchar(20) NOT NULL,
-  `descripcion` varchar(200) NOT NULL,
+  `titulo` varchar(50) NOT NULL,
+  `descripcion` varchar(500) NOT NULL,
   `localidad` varchar(20) NOT NULL,
   `direccion` varchar(50) NOT NULL,
-  `imagen` varchar(50) NOT NULL,
+  `imagen` blob,
   `plazas` int(10) NOT NULL,
   `fecha_ini` date NOT NULL,
   `fecha_fin` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- 表的结构 `horarios`
+--
+
+CREATE TABLE `horarios` (
+  `id_curso` int(20) NOT NULL,
+  `Dias` varchar(20) NOT NULL,
+  `Hora_ini` varchar(5) NOT NULL,
+  `Hora_fin` varchar(5) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -45,8 +58,8 @@ CREATE TABLE `cursos` (
 --
 
 CREATE TABLE `inscrito` (
-  `id_cursos` int(10) NOT NULL,
-  `id_usuarios` int(10) NOT NULL
+  `id_usuario` int(11) NOT NULL,
+  `id_curso` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -76,17 +89,24 @@ ALTER TABLE `cursos`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `horarios`
+--
+ALTER TABLE `horarios`
+  ADD KEY `id_curso` (`id_curso`);
+
+--
 -- Indexes for table `inscrito`
 --
 ALTER TABLE `inscrito`
-  ADD KEY `id_cursos` (`id_cursos`),
-  ADD KEY `id_usuarios` (`id_usuarios`);
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_curso` (`id_curso`);
 
 --
 -- Indexes for table `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `correo` (`correo`);
 
 --
 -- 在导出的表使用AUTO_INCREMENT
@@ -101,22 +121,23 @@ ALTER TABLE `cursos`
 -- 使用表AUTO_INCREMENT `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT;
 --
 -- 限制导出的表
 --
 
 --
--- 限制表 `cursos`
+-- 限制表 `horarios`
 --
-ALTER TABLE `cursos`
-  ADD CONSTRAINT `cursos_ibfk_1` FOREIGN KEY (`id`) REFERENCES `inscrito` (`id_cursos`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `horarios`
+  ADD CONSTRAINT `horarios_ibfk_1` FOREIGN KEY (`id_curso`) REFERENCES `cursos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- 限制表 `inscrito`
 --
 ALTER TABLE `inscrito`
-  ADD CONSTRAINT `inscrito_ibfk_1` FOREIGN KEY (`id_usuarios`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `inscrito_ibfk_1` FOREIGN KEY (`id_curso`) REFERENCES `cursos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `inscrito_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
