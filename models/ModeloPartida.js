@@ -11,8 +11,7 @@ var ModeloParticipacion = require('./ModeloParticipa');
 function Partida(partida) {
     this.Nombre = partida.Nombre;
     this.Creador = partida.Creador;
-    var fecha = new Date();
-    this.Fecha = fecha.getFullYear().toString() + (fecha.getMonth()+1).toString() + fecha.getDate().toString();
+    this.Fecha = new Date();
     this.Turno = "";
     this.Estado = "Abierta";
     this.Ganador = "";

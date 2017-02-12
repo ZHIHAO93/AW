@@ -6,8 +6,7 @@ function Comentario(comentario) {
     this.Jugador = comentario.Jugador;
     this.Comentario = comentario.Comentario;
     this.Partida = comentario.Partida;
-    var fecha = new Date();
-    this.Fecha = fecha.getFullYear().toString() + (fecha.getMonth()+1).toString() + fecha.getDate().toString();
+    this.Fecha = new Date();
     this.Foto = comentario.Foto;
 }
 
