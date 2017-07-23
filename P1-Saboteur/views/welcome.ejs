@@ -1,0 +1,93 @@
+<%- include header %>
+
+	<div class="Contenedor">
+		<div class="TextoFondo"></div>
+
+		<div class="Contenido">
+			<h1>&#124Bienvenid@, <%= jugador.Nombre_completo %>!</h1>
+			<table class="TablaGrande">
+				<tr>
+					<td>
+						<div class="partidasAbiertas">
+							<h2>&#124Partidas abiertas</h2>
+							<p>
+							Las siguientes partidas han sido creadas por ti,<br>
+							pero aún están a la espera de recibir más jugadores.
+							</p>
+							<table class="Tablas">
+								<tr>
+									<th>Nombre</th><th>Fecha</th><th class="numJugadores">Número de jugadores</th>	
+								</tr>
+								<% partidaAbiertas.forEach(function(parti) { %>
+                                                                    <% if (parti.Creador === jugador.Nick) {%>
+                                                                        <% var participantes = parti.Participantes.split(',') %>
+                                                                        <tr>
+                                                                                <td><%= parti.Nombre %></td>
+                                                                                <td><%= parti.Fecha %></td>
+                                                                                <td><%= participantes.length %>/<%= parti.Max_jugadores %></td>
+                                                                                <% if (parti.Creador === jugador.Nick && participantes.length >= 3) {%>
+                                                                                        <td><a class="UnirCerrar" href="/cerrar/<%= parti.Nombre %>">Cerrar</a></td>
+                                                                                <% } %>
+                                                                        </tr>
+                                                                    <% } %>
+								<% }) %>
+							</table>
+						</div>
+					</td>
+					<td>
+						<div class="partidasActivas">
+							<h2>&#124Partidas activas</h2>
+							<p>
+							Haz clic en el título de la partida para ver su estado actual.<br>
+							Se marcan resaltadas las partidas en las que es tu turno.
+							</p>
+							<table class="Tablas">
+								<tr>
+									<th>Nombre</th><th>Usuario creador</th><th>Fecha</th><th>Turno</th>	
+								</tr>
+								<% partida.forEach(function(parti) { %>
+									<% if (parti.Estado === "Activa") {%>
+                                                                            <% if (parti.Turno === jugador.Nick) { %>
+                                                                                <tr class="resaltaFila">
+                                                                            <% } else { %>
+										<tr>
+                                                                            <% } %>
+											<td><a class="nomParti" href="/partida/<%= parti.Nombre %>"><%= parti.Nombre %></a></td>
+											<td><%= parti.Creador %></td>
+											<td><%= parti.Fecha %></td>
+											<td><%= parti.Turno %></td>
+										</tr>
+									<% } %>
+								<% }) %>
+							</table>
+						</div>
+					</td>
+					<td>
+						<div class="partidasTerminadas">
+							<h2>&#124Partidas terminadas</h2>
+							<table class="Tablas">
+								<tr>
+									<th>Nombre</th><th>Usuario creador</th><th>Has ganado?</th>	
+								</tr>
+								<% partida.forEach(function(parti) { %>
+									<% if (parti.Estado === "Terminada") { %>
+										<tr>
+											<td><a class="nomParti" href="/partida/<%= parti.Nombre %>"><%= parti.Nombre %></a></td>
+											<td><%= parti.Creador %></td>
+											<% if (parti.Ganador === parti.Role) {%>
+												<td>SI</td>
+											<% } else {%>
+												<td>NO</td>
+											<% } %>
+										</tr>
+									<% } %>
+								<% }) %>
+							</table>
+						</div>
+
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+<%- include footer %>

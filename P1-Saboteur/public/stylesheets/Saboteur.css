@@ -1,0 +1,212 @@
+/*@import url('https://fonts.googleapis.com/css?family=Special+Elite|Open+Sans|Roboto');*/
+/* Estilo de componentes */
+body {
+    background: url("../images/portada1.jpg") repeat-y;
+    background-size: 100%;
+    margin: auto;
+    font-family: Arial;
+    /*
+    font-family: 'Special Elite', cursive;
+    font-family: 'Roboto', sans-serif;
+    font-family: 'Open Sans', sans-serif;*/
+}
+
+header {
+    height: 150px;
+    position: relative;
+    overflow: hidden;
+}
+
+h1, h2 {
+    margin-left: -5px;
+}
+
+/* Estilo de Logo */
+.Logo {
+    top: 10px;
+    left: 10px;
+    position: relative;
+    float: left;
+}
+
+/* Estilo de perfil */
+.Perfil {
+    color: #ff8566;
+    max-height: 55px;
+    max-width: 55px;
+}
+
+/* Estilo de login */
+.Login {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    padding-top: 30px;
+    float: right;
+    height: 40px;
+    width: 40%;
+}
+
+/* Estilo barra de enlaces */
+.BarraBoton {
+    position: relative;
+    top: 90px;
+    right: 40px;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff8566;
+}
+
+.BarraBoton td {
+    padding-left: 10px;
+    border: 0px;
+}
+
+.BarraBoton a {
+    color: #ff8566;
+    text-decoration: none;
+}
+
+/* Barra de separacion */
+.Barra {
+    background-color: #ffa31a;
+    height: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+/* Estilo de bienvenido */
+.BienVenido {
+    float: left;
+    width: 65%;
+    top: 20px;
+    color: white;
+    font-size: 25px;
+    margin-top: 70px;
+    text-align: center;
+}
+
+/* Panel de nuevo usuario */
+.NuevoUsuario {
+    float: left;
+    width: 30%;
+    position: relative;
+    top: 20px;
+}
+
+/* Fondo transparente */
+.TextoFondo {
+    position: absolute;
+    filter: alpha(opacity=40);
+    -moz-opacity:0.4;
+    -khtml-opacity:0.4;
+    opacity: 0.4;
+    background-color: #ffffff;
+    height: 100%;
+    width: 100%;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+}
+
+/* formulario de nuevo usuario */
+.FormPanel {
+    position: relative;
+    margin-left: 15px;
+    padding-bottom: 20px;
+    overflow: hidden;
+}
+
+.ResaltaRojo {
+    color: red;
+}
+
+.TextField {
+    filter: alpha(opacity=20);
+    -moz-opacity:0.2;
+    -khtml-opacity:0.2;
+    opacity: 0.8;
+    color: black;
+    font-weight: bold;
+}
+
+.Boton {
+    height: 30px;
+}
+
+.ResaltaEnlace {
+    color: #663300;
+    text-decoration: none;
+}
+
+
+button {
+    margin-left: 5px;
+    background-color: #cc0000;
+    height: 60px;
+    color: white;
+    border: 0px;
+    font-weight: bold;
+    float: left;
+}
+
+/* Estilo pie de la pagina */
+.piePagina {
+    position: fixed;
+    bottom: 0px;
+    height: auto;
+    background-color: white;
+    font-weight: bold;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.email {
+    right: 0px;
+}
+
+.UnirCerrar {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.nomParti {
+    color:black;
+    text-decoration: none;
+}
+
+.negrita {
+    font-weight: bold;
+}
+
+.Turno {
+    color: #663300;
+    text-align: center;
+}
+
+.Error {
+	/*Nuevo*/
+	border: 2px solid #ff0000;
+	background-color:#ffcc66;
+	color:#ff0000;
+	text-align: center;
+	font-weight: bold;
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+/* Nuevo introducido por Fer */
+/*Div donde se pone el boton*/
+.Boton{
+	margin-top: 20px;
+}
+/*Nueva estilo del botón*/
+.boton{
+	border-radius: 20px;
+	font-family: Arial;
+	color:black;
+	background: #ff9933;
+}
